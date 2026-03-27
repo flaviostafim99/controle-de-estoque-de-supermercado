@@ -4,13 +4,20 @@
   <meta charset="UTF-8">
   <title>Controle de Estoque</title>
 
-  <!-- CSS separado -->
+  <!-- CSS -->
   <link rel="stylesheet" href="style.css">
 
-  <!-- Biblioteca do leitor -->
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#4facfe">
+
+  <!-- Leitor de código de barras -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 </head>
+
 <body>
+
+<div class="container">
 
   <h1>📦 Controle de Estoque</h1>
 
@@ -41,10 +48,17 @@
     <tbody id="tabela"></tbody>
   </table>
 
-<script>
-let estoque = {};
+</div>
 
-// Inicializa o scanner
+<script>
+let estoque = JSON.parse(localStorage.getItem("estoque")) || {};
+
+// SALVAR no navegador
+function salvar() {
+  localStorage.setItem("estoque", JSON.stringify(estoque));
+}
+
+// Scanner
 Quagga.init({
   inputStream: {
     name: "Live",
@@ -71,7 +85,7 @@ Quagga.onDetected(function(data) {
   document.getElementById("codigo").value = codigo;
 });
 
-// Registrar entrada ou saída
+// Registrar entrada/saída
 function registrar(tipo) {
   let codigo = document.getElementById("codigo").value;
   let quantidade = parseInt(document.getElementById("quantidade").value);
@@ -91,6 +105,7 @@ function registrar(tipo) {
     estoque[codigo] -= quantidade;
   }
 
+  salvar();
   atualizarTabela();
 }
 
@@ -117,13 +132,23 @@ function atualizarTabela() {
 
 // Editar manualmente
 function editar(codigo, valor) {
-  estoque[codigo] = parseInt(valor);
+  estoque[codigo] = parseInt(valor) || 0;
+  salvar();
 }
 
 // Remover produto
 function remover(codigo) {
   delete estoque[codigo];
+  salvar();
   atualizarTabela();
+}
+
+// Carregar ao abrir
+atualizarTabela();
+
+// Service Worker (PWA)
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
 }
 </script>
 
