@@ -4,37 +4,11 @@
   <meta charset="UTF-8">
   <title>Controle de Estoque</title>
 
+  <!-- CSS separado -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Biblioteca do leitor -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
-
-  <style>
-    body {
-      font-family: Arial;
-      text-align: center;
-      background: #f4f4f4;
-    }
-
-    #scanner {
-      width: 400px;
-      margin: 20px auto;
-      border: 2px solid #333;
-    }
-
-    input, button {
-      padding: 10px;
-      margin: 5px;
-    }
-
-    table {
-      margin: 20px auto;
-      border-collapse: collapse;
-      width: 80%;
-    }
-
-    th, td {
-      border: 1px solid #333;
-      padding: 10px;
-    }
-  </style>
 </head>
 <body>
 
@@ -91,7 +65,7 @@ Quagga.init({
   Quagga.start();
 });
 
-// Quando detectar código
+// Detecta código
 Quagga.onDetected(function(data) {
   let codigo = data.codeResult.code;
   document.getElementById("codigo").value = codigo;
