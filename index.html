@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Controle de Estoque</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      background: #f4f4f4;
+    }
+
+    #scanner {
+      width: 400px;
+      margin: 20px auto;
+      border: 2px solid #333;
+    }
+
+    input, button {
+      padding: 10px;
+      margin: 5px;
+    }
+
+    table {
+      margin: 20px auto;
+      border-collapse: collapse;
+      width: 80%;
+    }
+
+    th, td {
+      border: 1px solid #333;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📦 Controle de Estoque</h1>
+
+  <div id="scanner"></div>
+
+  <h3>Produto escaneado:</h3>
+  <input type="text" id="codigo" placeholder="Código do produto">
+
+  <br>
+
+  <input type="number" id="quantidade" placeholder="Quantidade">
+
+  <br>
+
+  <button onclick="registrar('entrada')">Entrada ➕</button>
+  <button onclick="registrar('saida')">Saída ➖</button>
+
+  <h2>📋 Estoque</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Quantidade</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody id="tabela"></tbody>
+  </table>
+
+<script>
+let estoque = {};
+
+// Inicializa o scanner
+Quagga.init({
+  inputStream: {
+    name: "Live",
+    type: "LiveStream",
+    target: document.querySelector('#scanner'),
+    constraints: {
+      facingMode: "environment"
+    }
+  },
+  decoder: {
+    readers: ["ean_reader", "code_128_reader"]
+  }
+}, function(err) {
+  if (err) {
+    console.log(err);
+    return;
+  }
+  Quagga.start();
+});
+
+// Quando detectar código
+Quagga.onDetected(function(data) {
+  let codigo = data.codeResult.code;
+  document.getElementById("codigo").value = codigo;
+});
+
+// Registrar entrada ou saída
+function registrar(tipo) {
+  let codigo = document.getElementById("codigo").value;
+  let quantidade = parseInt(document.getElementById("quantidade").value);
+
+  if (!codigo || !quantidade) {
+    alert("Preencha tudo!");
+    return;
+  }
+
+  if (!estoque[codigo]) {
+    estoque[codigo] = 0;
+  }
+
+  if (tipo === 'entrada') {
+    estoque[codigo] += quantidade;
+  } else {
+    estoque[codigo] -= quantidade;
+  }
+
+  atualizarTabela();
+}
+
+// Atualizar tabela
+function atualizarTabela() {
+  let tabela = document.getElementById("tabela");
+  tabela.innerHTML = "";
+
+  for (let codigo in estoque) {
+    let linha = `
+      <tr>
+        <td>${codigo}</td>
+        <td contenteditable="true" onblur="editar('${codigo}', this.innerText)">
+          ${estoque[codigo]}
+        </td>
+        <td>
+          <button onclick="remover('${codigo}')">❌</button>
+        </td>
+      </tr>
+    `;
+    tabela.innerHTML += linha;
+  }
+}
+
+// Editar manualmente
+function editar(codigo, valor) {
+  estoque[codigo] = parseInt(valor);
+}
+
+// Remover produto
+function remover(codigo) {
+  delete estoque[codigo];
+  atualizarTabela();
+}
+</script>
+
+</body>
+</html>
