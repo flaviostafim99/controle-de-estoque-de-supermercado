@@ -4,14 +4,11 @@
   <meta charset="UTF-8">
   <title>Controle de Estoque</title>
 
-  <!-- CSS -->
   <link rel="stylesheet" href="style.css">
 
-  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#4facfe">
 
-  <!-- Leitor de código de barras -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 </head>
 
@@ -28,6 +25,10 @@
 
   <br>
 
+  <input type="text" id="nome" placeholder="Nome do produto">
+
+  <br>
+
   <input type="number" id="quantidade" placeholder="Quantidade">
 
   <br>
@@ -41,6 +42,7 @@
     <thead>
       <tr>
         <th>Código</th>
+        <th>Nome</th>
         <th>Quantidade</th>
         <th>Ações</th>
       </tr>
@@ -53,7 +55,7 @@
 <script>
 let estoque = JSON.parse(localStorage.getItem("estoque")) || {};
 
-// SALVAR no navegador
+// Salvar
 function salvar() {
   localStorage.setItem("estoque", JSON.stringify(estoque));
 }
@@ -72,10 +74,7 @@ Quagga.init({
     readers: ["ean_reader", "code_128_reader"]
   }
 }, function(err) {
-  if (err) {
-    console.log(err);
-    return;
-  }
+  if (err) return console.log(err);
   Quagga.start();
 });
 
@@ -83,26 +82,32 @@ Quagga.init({
 Quagga.onDetected(function(data) {
   let codigo = data.codeResult.code;
   document.getElementById("codigo").value = codigo;
+
+  // Se já existir, preenche nome automático
+  if (estoque[codigo]) {
+    document.getElementById("nome").value = estoque[codigo].nome;
+  }
 });
 
-// Registrar entrada/saída
+// Registrar
 function registrar(tipo) {
   let codigo = document.getElementById("codigo").value;
+  let nome = document.getElementById("nome").value;
   let quantidade = parseInt(document.getElementById("quantidade").value);
 
-  if (!codigo || !quantidade) {
+  if (!codigo || !nome || !quantidade) {
     alert("Preencha tudo!");
     return;
   }
 
   if (!estoque[codigo]) {
-    estoque[codigo] = 0;
+    estoque[codigo] = { nome: nome, quantidade: 0 };
   }
 
   if (tipo === 'entrada') {
-    estoque[codigo] += quantidade;
+    estoque[codigo].quantidade += quantidade;
   } else {
-    estoque[codigo] -= quantidade;
+    estoque[codigo].quantidade -= quantidade;
   }
 
   salvar();
@@ -115,11 +120,16 @@ function atualizarTabela() {
   tabela.innerHTML = "";
 
   for (let codigo in estoque) {
+    let item = estoque[codigo];
+
     let linha = `
       <tr>
         <td>${codigo}</td>
-        <td contenteditable="true" onblur="editar('${codigo}', this.innerText)">
-          ${estoque[codigo]}
+        <td contenteditable="true" onblur="editarNome('${codigo}', this.innerText)">
+          ${item.nome}
+        </td>
+        <td contenteditable="true" onblur="editarQuantidade('${codigo}', this.innerText)">
+          ${item.quantidade}
         </td>
         <td>
           <button onclick="remover('${codigo}')">❌</button>
@@ -130,23 +140,29 @@ function atualizarTabela() {
   }
 }
 
-// Editar manualmente
-function editar(codigo, valor) {
-  estoque[codigo] = parseInt(valor) || 0;
+// Editar nome
+function editarNome(codigo, valor) {
+  estoque[codigo].nome = valor;
   salvar();
 }
 
-// Remover produto
+// Editar quantidade
+function editarQuantidade(codigo, valor) {
+  estoque[codigo].quantidade = parseInt(valor) || 0;
+  salvar();
+}
+
+// Remover
 function remover(codigo) {
   delete estoque[codigo];
   salvar();
   atualizarTabela();
 }
 
-// Carregar ao abrir
+// Inicializar
 atualizarTabela();
 
-// Service Worker (PWA)
+// Service Worker
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js");
 }
