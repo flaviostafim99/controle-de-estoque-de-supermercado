@@ -4,10 +4,11 @@
   <meta charset="UTF-8">
   <title>Controle de Estoque</title>
 
+  <!-- CSS -->
   <link rel="stylesheet" href="style.css">
 
-  <!-- Scanner -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+  <!-- SCANNER MELHOR -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 
 <body>
@@ -20,7 +21,7 @@
 
       <h2>📷 Scanner</h2>
 
-      <div id="scanner"></div>
+      <div id="scanner" style="width:100%"></div>
 
       <table class="form-tabela">
         <tr>
@@ -74,67 +75,40 @@ function salvar() {
   localStorage.setItem("estoque", JSON.stringify(estoque));
 }
 
-// SCANNER CONFIGURADO
-Quagga.init({
-  inputStream: {
-    type: "LiveStream",
-    target: document.querySelector('#scanner'),
-    constraints: {
-      facingMode: "environment"
-    }
-  },
-  locator: {
-    patchSize: "large",
-    halfSample: false
-  },
-  decoder: {
-    readers: [
-      "ean_reader",
-      "ean_8_reader",
-      "code_128_reader",
-      "upc_reader"
-    ]
-  },
-  locate: true
-}, function(err) {
-  if (err) {
-    console.log(err);
-    return;
+// 🚀 SCANNER NOVO (FUNCIONANDO)
+const html5QrCode = new Html5Qrcode("scanner");
+
+Html5Qrcode.getCameras().then(devices => {
+  if (devices && devices.length) {
+
+    html5QrCode.start(
+      devices[0].id,
+      {
+        fps: 10,
+        qrbox: 250
+      },
+      (decodedText) => {
+
+        console.log("Código detectado:", decodedText);
+
+        // PREENCHE AUTOMATICAMENTE
+        document.getElementById("codigo").value = decodedText;
+
+        // Se já existe no estoque
+        if (estoque[decodedText]) {
+          document.getElementById("nome").value = estoque[decodedText].nome;
+        }
+
+        // Vibração
+        if (navigator.vibrate) {
+          navigator.vibrate(200);
+        }
+      }
+    );
+
   }
-  console.log("Scanner iniciado");
-  Quagga.start();
-});
-
-// CONTROLE DE LEITURA
-let lendo = false;
-
-// DETECTA CÓDIGO
-Quagga.onDetected(function(data) {
-
-  if (lendo) return;
-
-  lendo = true;
-
-  let codigo = data.codeResult.code;
-  console.log("Detectado:", codigo);
-
-  // PREENCHE AUTOMATICAMENTE
-  document.getElementById("codigo").value = codigo;
-
-  // Se já existe no estoque, preenche nome
-  if (estoque[codigo]) {
-    document.getElementById("nome").value = estoque[codigo].nome;
-  }
-
-  // vibração (celular)
-  if (navigator.vibrate) {
-    navigator.vibrate(200);
-  }
-
-  // evita repetição
-  setTimeout(() => {
-    lendo = false;
-  }, 2000);
+}).catch(err => {
+  console.log("Erro ao acessar câmera:", err);
 });
 
 // REGISTRAR
@@ -170,7 +144,7 @@ function atualizarTabela() {
   for (let codigo in estoque) {
     let item = estoque[codigo];
 
-    let linha = `
+    tabela.innerHTML += `
       <tr>
         <td contenteditable="true" onblur="editarNome('${codigo}', this.innerText)">
           ${item.nome}
@@ -184,7 +158,6 @@ function atualizarTabela() {
         </td>
       </tr>
     `;
-    tabela.innerHTML += linha;
   }
 }
 
