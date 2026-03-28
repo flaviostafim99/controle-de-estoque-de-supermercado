@@ -4,27 +4,30 @@
   <meta charset="UTF-8">
   <title>Controle de Estoque</title>
 
+  <!-- CSS -->
   <link rel="stylesheet" href="style.css">
 
+  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0f2027">
+  <meta name="theme-color" content="#141e30">
 
+  <!-- Scanner -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 </head>
 
 <body>
 
 <div class="container">
-
   <div class="layout">
 
-    <!-- ESQUERDA -->
+    <!-- ESQUERDA (SCANNER + FORM) -->
     <div class="painel-esquerdo">
 
-      <h1>📦 Controle</h1>
+      <h2>📷 Scanner</h2>
 
       <div id="scanner"></div>
 
+      <!-- FORMULÁRIO -->
       <table class="form-tabela">
         <tr>
           <td>Nome:</td>
@@ -67,12 +70,12 @@
     </div>
 
   </div>
-
 </div>
 
 <script>
 let estoque = JSON.parse(localStorage.getItem("estoque")) || {};
 
+// SALVAR
 function salvar() {
   localStorage.setItem("estoque", JSON.stringify(estoque));
 }
@@ -83,7 +86,9 @@ Quagga.init({
     name: "Live",
     type: "LiveStream",
     target: document.querySelector('#scanner'),
-    constraints: { facingMode: "environment" }
+    constraints: {
+      facingMode: "environment"
+    }
   },
   decoder: {
     readers: ["ean_reader", "code_128_reader"]

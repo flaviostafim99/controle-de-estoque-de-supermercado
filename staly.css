@@ -5,27 +5,12 @@
   box-sizing: border-box;
 }
 
-/* FUNDO CROMADO AZUL */
+/* FUNDO MODERNO */
 body {
-  font-family: 'Segoe UI', Arial, sans-serif;
+  font-family: Arial, sans-serif;
   height: 100vh;
-  background: linear-gradient(
-    135deg,
-    #0f2027,
-    #203a43,
-    #2c5364,
-    #3a7bd5,
-    #00d2ff
-  );
-  background-size: 400% 400%;
-  animation: brilho 10s ease infinite;
-}
 
-/* ANIMAÇÃO */
-@keyframes brilho {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  background: linear-gradient(135deg, #141e30, #243b55);
 }
 
 /* CONTAINER */
@@ -34,107 +19,73 @@ body {
   padding: 20px;
 }
 
-/* LAYOUT */
+/* LAYOUT LADO A LADO */
 .layout {
   display: flex;
-  height: 100%;
   gap: 20px;
+  height: 100%;
 }
 
-/* PAINEL ESQUERDO */
+/* ESQUERDA (SCANNER) */
 .painel-esquerdo {
-  width: 30%;
+  width: 35%;
   background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(12px);
-  border-radius: 15px;
-  padding: 20px;
+  backdrop-filter: blur(10px);
+  padding: 15px;
+  border-radius: 10px;
   color: white;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
-/* PAINEL DIREITO (ESTOQUE) */
+/* DIREITA (ESTOQUE GRANDE) */
 .painel-direito {
-  width: 70%;
-  background: rgba(255,255,255,0.95);
-  border-radius: 15px;
+  width: 65%;
+  background: white;
   padding: 20px;
+  border-radius: 10px;
   overflow-y: auto;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-}
-
-/* TITULOS */
-h1 {
-  margin-bottom: 15px;
-}
-
-h2 {
-  margin-bottom: 15px;
-  color: #1e3c72;
 }
 
 /* SCANNER */
 #scanner {
   width: 100%;
-  margin: 10px 0;
-  border-radius: 10px;
-  border: 2px solid #00d2ff;
+  height: 250px;
+  background: black;
+  margin-bottom: 10px;
 }
 
-/* FORMULÁRIO EM TABELA */
+/* FORM */
 .form-tabela {
   width: 100%;
   margin-top: 10px;
-  border-collapse: collapse;
   color: white;
 }
 
 .form-tabela td {
-  padding: 8px;
-  font-size: 14px;
+  padding: 6px;
 }
 
-/* LABELS */
-.form-tabela td:first-child {
-  width: 35%;
-  font-weight: bold;
-  text-align: left;
-}
-
-/* INPUTS */
 input {
   width: 100%;
-  padding: 12px;
-  border-radius: 8px;
-  border: none;
-  font-size: 14px;
+  padding: 8px;
 }
 
 /* BOTÕES */
 button {
   width: 100%;
-  padding: 12px;
+  padding: 10px;
   margin-top: 10px;
   border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
+  border-radius: 6px;
   color: white;
-  transition: 0.3s;
+  cursor: pointer;
 }
 
-/* ENTRADA */
 button[onclick*="entrada"] {
-  background: linear-gradient(135deg, #00c853, #64dd17);
+  background: #28a745;
 }
 
-/* SAÍDA */
 button[onclick*="saida"] {
-  background: linear-gradient(135deg, #ff1744, #ff5252);
-}
-
-/* HOVER */
-button:hover {
-  transform: scale(1.05);
+  background: #dc3545;
 }
 
 /* TABELA ESTOQUE */
@@ -144,45 +95,20 @@ button:hover {
   font-size: 18px;
 }
 
-/* CABEÇALHO */
 .tabela-estoque th {
-  background: #1e3c72;
+  background: #243b55;
   color: white;
-  padding: 18px;
-  font-size: 18px;
+  padding: 12px;
 }
 
-/* CÉLULAS */
 .tabela-estoque td {
-  padding: 16px;
+  padding: 12px;
   border-bottom: 1px solid #ddd;
-  font-size: 17px;
 }
 
-/* LINHAS */
-.tabela-estoque tr:nth-child(even) {
-  background: #f5f7fa;
-}
-
+/* HOVER */
 .tabela-estoque tr:hover {
-  background: #e3f2fd;
-}
-
-/* CAMPOS EDITÁVEIS */
-td[contenteditable="true"] {
-  background: #fff3cd;
-  cursor: text;
-}
-
-/* BOTÃO REMOVER */
-td button {
-  background: #ff1744;
-  padding: 6px 10px;
-  border-radius: 6px;
-}
-
-td button:hover {
-  background: #d50000;
+  background: #f1f1f1;
 }
 
 /* RESPONSIVO */
