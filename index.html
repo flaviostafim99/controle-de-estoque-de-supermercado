@@ -6,9 +6,11 @@
 
   <link rel="stylesheet" href="style.css">
 
+  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#4facfe">
+  <meta name="theme-color" content="#0f2027">
 
+  <!-- Scanner -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 </head>
 
@@ -16,51 +18,58 @@
 
 <div class="container">
 
-  <h1>📦 Controle de Estoque</h1>
+  <div class="layout">
 
-  <div id="scanner"></div>
+    <!-- ESQUERDA -->
+    <div class="painel-esquerdo">
 
-  <h3>Produto escaneado:</h3>
-  <input type="text" id="codigo" placeholder="Código do produto">
+      <h1>📦 Controle</h1>
 
-  <br>
+      <div id="scanner"></div>
 
-  <input type="text" id="nome" placeholder="Nome do produto">
+      <input type="text" id="codigo" placeholder="Código do produto">
 
-  <br>
+      <input type="text" id="nome" placeholder="Nome do produto">
 
-  <input type="number" id="quantidade" placeholder="Quantidade">
+      <input type="number" id="quantidade" placeholder="Quantidade">
 
-  <br>
+      <button onclick="registrar('entrada')">Entrada ➕</button>
+      <button onclick="registrar('saida')">Saída ➖</button>
 
-  <button onclick="registrar('entrada')">Entrada ➕</button>
-  <button onclick="registrar('saida')">Saída ➖</button>
+    </div>
 
-  <h2>📋 Estoque</h2>
+    <!-- DIREITA -->
+    <div class="painel-direito">
 
-  <table>
-    <thead>
-      <tr>
-        <th>Código</th>
-        <th>Nome</th>
-        <th>Quantidade</th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-    <tbody id="tabela"></tbody>
-  </table>
+      <h2>📋 Estoque</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nome</th>
+            <th>Quantidade</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tabela"></tbody>
+      </table>
+
+    </div>
+
+  </div>
 
 </div>
 
 <script>
 let estoque = JSON.parse(localStorage.getItem("estoque")) || {};
 
-// Salvar
+// SALVAR
 function salvar() {
   localStorage.setItem("estoque", JSON.stringify(estoque));
 }
 
-// Scanner
+// SCANNER
 Quagga.init({
   inputStream: {
     name: "Live",
@@ -78,18 +87,17 @@ Quagga.init({
   Quagga.start();
 });
 
-// Detecta código
+// DETECTA
 Quagga.onDetected(function(data) {
   let codigo = data.codeResult.code;
   document.getElementById("codigo").value = codigo;
 
-  // Se já existir, preenche nome automático
   if (estoque[codigo]) {
     document.getElementById("nome").value = estoque[codigo].nome;
   }
 });
 
-// Registrar
+// REGISTRAR
 function registrar(tipo) {
   let codigo = document.getElementById("codigo").value;
   let nome = document.getElementById("nome").value;
@@ -114,7 +122,7 @@ function registrar(tipo) {
   atualizarTabela();
 }
 
-// Atualizar tabela
+// TABELA
 function atualizarTabela() {
   let tabela = document.getElementById("tabela");
   tabela.innerHTML = "";
@@ -140,29 +148,28 @@ function atualizarTabela() {
   }
 }
 
-// Editar nome
+// EDITAR
 function editarNome(codigo, valor) {
   estoque[codigo].nome = valor;
   salvar();
 }
 
-// Editar quantidade
 function editarQuantidade(codigo, valor) {
   estoque[codigo].quantidade = parseInt(valor) || 0;
   salvar();
 }
 
-// Remover
+// REMOVER
 function remover(codigo) {
   delete estoque[codigo];
   salvar();
   atualizarTabela();
 }
 
-// Inicializar
+// INICIAR
 atualizarTabela();
 
-// Service Worker
+// PWA
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js");
 }

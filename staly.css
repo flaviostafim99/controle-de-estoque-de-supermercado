@@ -5,181 +5,172 @@
   box-sizing: border-box;
 }
 
-/* FUNDO */
+/* FUNDO CROMADO AZUL */
 body {
   font-family: 'Segoe UI', Arial, sans-serif;
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  height: 100vh;
+  background: linear-gradient(
+    135deg,
+    #0f2027,
+    #203a43,
+    #2c5364,
+    #3a7bd5,
+    #00d2ff
+  );
+  background-size: 400% 400%;
+  animation: brilho 10s ease infinite;
+}
+
+/* ANIMAÇÃO */
+@keyframes brilho {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 /* CONTAINER */
 .container {
-  width: 95%;
-  max-width: 1000px;
-  background: #ffffff;
-  padding: 25px;
-  border-radius: 18px;
-  box-shadow: 0 15px 40px rgba(0,0,0,0.25);
-  text-align: center;
+  height: 100vh;
+  padding: 20px;
 }
 
-/* TÍTULOS */
+/* LAYOUT */
+.layout {
+  display: flex;
+  height: 100%;
+  gap: 20px;
+}
+
+/* ESQUERDA */
+.painel-esquerdo {
+  width: 30%;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 20px;
+  color: white;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+/* DIREITA */
+.painel-direito {
+  width: 70%;
+  background: rgba(255,255,255,0.95);
+  border-radius: 15px;
+  padding: 20px;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+/* TITULOS */
 h1 {
-  color: #1e3c72;
   margin-bottom: 15px;
-  font-size: 28px;
 }
 
 h2 {
-  margin-top: 30px;
-  color: #333;
+  margin-bottom: 15px;
+  color: #1e3c72;
 }
 
 /* SCANNER */
 #scanner {
   width: 100%;
-  max-width: 420px;
-  margin: 15px auto;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 3px solid #2a5298;
+  margin: 10px 0;
+  border-radius: 10px;
+  border: 2px solid #00d2ff;
 }
 
 /* INPUTS */
 input {
-  width: 220px;
+  width: 100%;
   padding: 12px;
-  margin: 10px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  font-size: 15px;
-  transition: all 0.3s ease;
-}
-
-#nome {
-  width: 260px;
-}
-
-input:focus {
-  border-color: #2a5298;
-  outline: none;
-  box-shadow: 0 0 10px rgba(42,82,152,0.4);
+  margin: 8px 0;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
 }
 
 /* BOTÕES */
 button {
-  padding: 12px 18px;
-  margin: 10px;
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
   border: none;
-  border-radius: 10px;
-  font-size: 15px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  color: white;
+  border-radius: 8px;
   font-weight: bold;
+  cursor: pointer;
+  color: white;
+  transition: 0.3s;
 }
 
 /* ENTRADA */
 button[onclick*="entrada"] {
-  background: linear-gradient(135deg, #28a745, #34d058);
-}
-
-button[onclick*="entrada"]:hover {
-  transform: scale(1.05);
-  background: linear-gradient(135deg, #218838, #2ecc71);
+  background: linear-gradient(135deg, #00c853, #64dd17);
 }
 
 /* SAÍDA */
 button[onclick*="saida"] {
-  background: linear-gradient(135deg, #dc3545, #ff5c5c);
+  background: linear-gradient(135deg, #ff1744, #ff5252);
 }
 
-button[onclick*="saida"]:hover {
+/* HOVER */
+button:hover {
   transform: scale(1.05);
-  background: linear-gradient(135deg, #c82333, #ff3333);
 }
 
 /* TABELA */
 table {
   width: 100%;
-  margin-top: 25px;
   border-collapse: collapse;
-  border-radius: 12px;
-  overflow: hidden;
+  font-size: 16px;
 }
 
 /* CABEÇALHO */
 th {
-  background: #2a5298;
+  background: #1e3c72;
   color: white;
-  padding: 14px;
-  font-size: 15px;
+  padding: 15px;
 }
 
 /* CÉLULAS */
 td {
-  padding: 12px;
-  border-bottom: 1px solid #eee;
-  font-size: 14px;
+  padding: 14px;
+  border-bottom: 1px solid #ddd;
 }
 
 /* LINHAS */
 tr:nth-child(even) {
-  background: #f8f9fc;
+  background: #f5f7fa;
 }
 
 tr:hover {
-  background: #eaf1ff;
+  background: #e3f2fd;
 }
 
-/* EDIÇÃO */
+/* EDITÁVEL */
 td[contenteditable="true"] {
-  background: #fff8dc;
-  cursor: text;
+  background: #fff3cd;
 }
 
 /* BOTÃO REMOVER */
 td button {
-  background: #ff4d4d;
-  padding: 8px 12px;
-  border-radius: 8px;
+  background: #ff1744;
+  padding: 6px 10px;
+  border-radius: 6px;
 }
 
 td button:hover {
-  background: #cc0000;
-  transform: scale(1.05);
-}
-
-/* SCROLL TABELA (caso cresça muito) */
-table {
-  display: block;
-  max-height: 300px;
-  overflow-y: auto;
+  background: #d50000;
 }
 
 /* RESPONSIVO */
-@media (max-width: 700px) {
-
-  .container {
-    padding: 15px;
+@media (max-width: 900px) {
+  .layout {
+    flex-direction: column;
   }
 
-  input {
-    width: 90%;
-  }
-
-  #nome {
-    width: 90%;
-  }
-
-  button {
-    width: 90%;
-  }
-
-  table {
-    font-size: 12px;
+  .painel-esquerdo,
+  .painel-direito {
+    width: 100%;
   }
 }
