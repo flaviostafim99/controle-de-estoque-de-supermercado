@@ -27,11 +27,23 @@
 
       <div id="scanner"></div>
 
-      <input type="text" id="codigo" placeholder="Código do produto">
+      <!-- FORMULÁRIO EM TABELA -->
+      <table class="form-tabela">
+        <tr>
+          <td>Nome:</td>
+          <td><input type="text" id="nome" placeholder="Nome do produto"></td>
+        </tr>
 
-      <input type="text" id="nome" placeholder="Nome do produto">
+        <tr>
+          <td>Código:</td>
+          <td><input type="text" id="codigo" placeholder="Código de barras"></td>
+        </tr>
 
-      <input type="number" id="quantidade" placeholder="Quantidade">
+        <tr>
+          <td>Quantidade:</td>
+          <td><input type="number" id="quantidade" placeholder="Quantidade"></td>
+        </tr>
+      </table>
 
       <button onclick="registrar('entrada')">Entrada ➕</button>
       <button onclick="registrar('saida')">Saída ➖</button>
