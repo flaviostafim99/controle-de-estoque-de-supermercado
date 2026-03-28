@@ -1,0 +1,15 @@
+function filtrarTabela() {
+  let busca = document.getElementById("busca").value.toLowerCase();
+  let linhas = document.querySelectorAll("#tabela tr");
+
+  linhas.forEach(linha => {
+    let nome = linha.children[0].innerText.toLowerCase();
+    let codigo = linha.children[1].innerText.toLowerCase();
+
+    if (nome.includes(busca) || codigo.includes(busca)) {
+      linha.style.display = "";
+    } else {
+      linha.style.display = "none";
+    }
+  });
+}

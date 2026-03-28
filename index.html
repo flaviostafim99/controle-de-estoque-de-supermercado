@@ -4,10 +4,9 @@
   <meta charset="UTF-8">
   <title>Controle de Estoque</title>
 
-  <!-- CSS -->
   <link rel="stylesheet" href="style.css">
 
-  <!-- SCANNER MELHOR -->
+  <!-- Scanner -->
   <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 
@@ -21,22 +20,20 @@
 
       <h2>📷 Scanner</h2>
 
-      <div id="scanner" style="width:100%"></div>
+      <div id="scanner"></div>
 
       <table class="form-tabela">
         <tr>
           <td>Nome:</td>
-          <td><input type="text" id="nome" placeholder="Nome do produto"></td>
+          <td><input type="text" id="nome"></td>
         </tr>
-
         <tr>
           <td>Código:</td>
-          <td><input type="text" id="codigo" placeholder="Código de barras"></td>
+          <td><input type="text" id="codigo"></td>
         </tr>
-
         <tr>
           <td>Quantidade:</td>
-          <td><input type="number" id="quantidade" placeholder="Quantidade"></td>
+          <td><input type="number" id="quantidade"></td>
         </tr>
       </table>
 
@@ -50,10 +47,19 @@
 
       <h2>📋 Estoque de Produtos</h2>
 
+      <!-- BUSCA -->
+      <input 
+        type="text" 
+        id="busca" 
+        placeholder="🔍 Buscar produto..."
+        onkeyup="filtrarTabela()"
+        class="input-busca"
+      >
+
       <table class="tabela-estoque">
         <thead>
           <tr>
-            <th>Nome do Produto</th>
+            <th>Nome</th>
             <th>Código</th>
             <th>Quantidade</th>
             <th></th>
@@ -70,45 +76,30 @@
 <script>
 let estoque = JSON.parse(localStorage.getItem("estoque")) || {};
 
-// SALVAR
 function salvar() {
   localStorage.setItem("estoque", JSON.stringify(estoque));
 }
 
-// 🚀 SCANNER NOVO (FUNCIONANDO)
+// SCANNER
 const html5QrCode = new Html5Qrcode("scanner");
 
 Html5Qrcode.getCameras().then(devices => {
-  if (devices && devices.length) {
-
+  if (devices.length) {
     html5QrCode.start(
       devices[0].id,
-      {
-        fps: 10,
-        qrbox: 250
-      },
-      (decodedText) => {
+      { fps: 10, qrbox: 250 },
+      (codigo) => {
 
-        console.log("Código detectado:", decodedText);
+        document.getElementById("codigo").value = codigo;
 
-        // PREENCHE AUTOMATICAMENTE
-        document.getElementById("codigo").value = decodedText;
-
-        // Se já existe no estoque
-        if (estoque[decodedText]) {
-          document.getElementById("nome").value = estoque[decodedText].nome;
+        if (estoque[codigo]) {
+          document.getElementById("nome").value = estoque[codigo].nome;
         }
 
-        // Vibração
-        if (navigator.vibrate) {
-          navigator.vibrate(200);
-        }
+        if (navigator.vibrate) navigator.vibrate(200);
       }
     );
-
   }
-}).catch(err => {
-  console.log("Erro ao acessar câmera:", err);
 });
 
 // REGISTRAR
@@ -123,7 +114,7 @@ function registrar(tipo) {
   }
 
   if (!estoque[codigo]) {
-    estoque[codigo] = { nome: nome, quantidade: 0 };
+    estoque[codigo] = { nome, quantidade: 0 };
   }
 
   if (tipo === 'entrada') {
@@ -136,7 +127,7 @@ function registrar(tipo) {
   atualizarTabela();
 }
 
-// ATUALIZAR TABELA
+// TABELA
 function atualizarTabela() {
   let tabela = document.getElementById("tabela");
   tabela.innerHTML = "";
@@ -153,12 +144,25 @@ function atualizarTabela() {
         <td contenteditable="true" onblur="editarQuantidade('${codigo}', this.innerText)">
           ${item.quantidade}
         </td>
-        <td>
-          <button onclick="remover('${codigo}')">❌</button>
-        </td>
+        <td><button onclick="remover('${codigo}')">❌</button></td>
       </tr>
     `;
   }
+}
+
+// BUSCA
+function filtrarTabela() {
+  let busca = document.getElementById("busca").value.toLowerCase();
+  let linhas = document.querySelectorAll("#tabela tr");
+
+  linhas.forEach(linha => {
+    let nome = linha.children[0].innerText.toLowerCase();
+    let codigo = linha.children[1].innerText.toLowerCase();
+
+    linha.style.display = 
+      nome.includes(busca) || codigo.includes(busca)
+      ? "" : "none";
+  });
 }
 
 // EDITAR
