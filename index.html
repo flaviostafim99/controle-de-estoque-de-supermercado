@@ -4,12 +4,7 @@
   <meta charset="UTF-8">
   <title>Controle de Estoque</title>
 
-  <!-- CSS -->
   <link rel="stylesheet" href="style.css">
-
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#141e30">
 
   <!-- Scanner -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
@@ -20,14 +15,13 @@
 <div class="container">
   <div class="layout">
 
-    <!-- ESQUERDA (SCANNER + FORM) -->
+    <!-- ESQUERDA -->
     <div class="painel-esquerdo">
 
       <h2>📷 Scanner</h2>
 
       <div id="scanner"></div>
 
-      <!-- FORMULÁRIO -->
       <table class="form-tabela">
         <tr>
           <td>Nome:</td>
@@ -50,7 +44,7 @@
 
     </div>
 
-    <!-- DIREITA (ESTOQUE GRANDE) -->
+    <!-- DIREITA -->
     <div class="painel-direito">
 
       <h2>📋 Estoque de Produtos</h2>
@@ -80,32 +74,67 @@ function salvar() {
   localStorage.setItem("estoque", JSON.stringify(estoque));
 }
 
-// SCANNER
+// SCANNER CONFIGURADO
 Quagga.init({
   inputStream: {
-    name: "Live",
     type: "LiveStream",
     target: document.querySelector('#scanner'),
     constraints: {
       facingMode: "environment"
     }
   },
+  locator: {
+    patchSize: "large",
+    halfSample: false
+  },
   decoder: {
-    readers: ["ean_reader", "code_128_reader"]
-  }
+    readers: [
+      "ean_reader",
+      "ean_8_reader",
+      "code_128_reader",
+      "upc_reader"
+    ]
+  },
+  locate: true
 }, function(err) {
-  if (err) return console.log(err);
+  if (err) {
+    console.log(err);
+    return;
+  }
+  console.log("Scanner iniciado");
   Quagga.start();
 });
 
-// DETECTA
+// CONTROLE DE LEITURA
+let lendo = false;
+
+// DETECTA CÓDIGO
 Quagga.onDetected(function(data) {
+
+  if (lendo) return;
+
+  lendo = true;
+
   let codigo = data.codeResult.code;
+  console.log("Detectado:", codigo);
+
+  // PREENCHE AUTOMATICAMENTE
   document.getElementById("codigo").value = codigo;
 
+  // Se já existe no estoque, preenche nome
   if (estoque[codigo]) {
     document.getElementById("nome").value = estoque[codigo].nome;
   }
+
+  // vibração (celular)
+  if (navigator.vibrate) {
+    navigator.vibrate(200);
+  }
+
+  // evita repetição
+  setTimeout(() => {
+    lendo = false;
+  }, 2000);
 });
 
 // REGISTRAR
@@ -179,11 +208,6 @@ function remover(codigo) {
 
 // INICIAR
 atualizarTabela();
-
-// PWA
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js");
-}
 </script>
 
 </body>
