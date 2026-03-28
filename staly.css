@@ -97,7 +97,7 @@ button[onclick*="saida"] {
 
 .tabela-estoque th {
   background: #243b55;
-  color: white;
+  color: rgb(4, 29, 111);
   padding: 12px;
 }
 
