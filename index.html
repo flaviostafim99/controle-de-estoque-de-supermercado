@@ -6,11 +6,9 @@
 
   <link rel="stylesheet" href="style.css">
 
-  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f2027">
 
-  <!-- Scanner -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 </head>
 
@@ -27,7 +25,6 @@
 
       <div id="scanner"></div>
 
-      <!-- FORMULÁRIO EM TABELA -->
       <table class="form-tabela">
         <tr>
           <td>Nome:</td>
@@ -50,16 +47,16 @@
 
     </div>
 
-    <!-- DIREITA -->
+    <!-- DIREITA (ESTOQUE GRANDE) -->
     <div class="painel-direito">
 
-      <h2>📋 Estoque</h2>
+      <h2>📋 Estoque de Produtos</h2>
 
-      <table>
+      <table class="tabela-estoque">
         <thead>
           <tr>
+            <th>Nome do Produto</th>
             <th>Código</th>
-            <th>Nome</th>
             <th>Quantidade</th>
             <th></th>
           </tr>
@@ -76,7 +73,6 @@
 <script>
 let estoque = JSON.parse(localStorage.getItem("estoque")) || {};
 
-// SALVAR
 function salvar() {
   localStorage.setItem("estoque", JSON.stringify(estoque));
 }
@@ -87,9 +83,7 @@ Quagga.init({
     name: "Live",
     type: "LiveStream",
     target: document.querySelector('#scanner'),
-    constraints: {
-      facingMode: "environment"
-    }
+    constraints: { facingMode: "environment" }
   },
   decoder: {
     readers: ["ean_reader", "code_128_reader"]
@@ -134,7 +128,7 @@ function registrar(tipo) {
   atualizarTabela();
 }
 
-// TABELA
+// ATUALIZAR TABELA
 function atualizarTabela() {
   let tabela = document.getElementById("tabela");
   tabela.innerHTML = "";
@@ -144,10 +138,10 @@ function atualizarTabela() {
 
     let linha = `
       <tr>
-        <td>${codigo}</td>
         <td contenteditable="true" onblur="editarNome('${codigo}', this.innerText)">
           ${item.nome}
         </td>
+        <td>${codigo}</td>
         <td contenteditable="true" onblur="editarQuantidade('${codigo}', this.innerText)">
           ${item.quantidade}
         </td>

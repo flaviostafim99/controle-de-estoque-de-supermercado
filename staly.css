@@ -41,18 +41,18 @@ body {
   gap: 20px;
 }
 
-/* ESQUERDA */
+/* PAINEL ESQUERDO */
 .painel-esquerdo {
   width: 30%;
   background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
   border-radius: 15px;
   padding: 20px;
   color: white;
   box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
-/* DIREITA */
+/* PAINEL DIREITO (ESTOQUE) */
 .painel-direito {
   width: 70%;
   background: rgba(255,255,255,0.95);
@@ -80,11 +80,30 @@ h2 {
   border: 2px solid #00d2ff;
 }
 
+/* FORMULÁRIO EM TABELA */
+.form-tabela {
+  width: 100%;
+  margin-top: 10px;
+  border-collapse: collapse;
+  color: white;
+}
+
+.form-tabela td {
+  padding: 8px;
+  font-size: 14px;
+}
+
+/* LABELS */
+.form-tabela td:first-child {
+  width: 35%;
+  font-weight: bold;
+  text-align: left;
+}
+
 /* INPUTS */
 input {
   width: 100%;
   padding: 12px;
-  margin: 8px 0;
   border-radius: 8px;
   border: none;
   font-size: 14px;
@@ -118,38 +137,41 @@ button:hover {
   transform: scale(1.05);
 }
 
-/* TABELA */
-table {
+/* TABELA ESTOQUE */
+.tabela-estoque {
   width: 100%;
   border-collapse: collapse;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 /* CABEÇALHO */
-th {
+.tabela-estoque th {
   background: #1e3c72;
   color: white;
-  padding: 15px;
+  padding: 18px;
+  font-size: 18px;
 }
 
 /* CÉLULAS */
-td {
-  padding: 14px;
+.tabela-estoque td {
+  padding: 16px;
   border-bottom: 1px solid #ddd;
+  font-size: 17px;
 }
 
 /* LINHAS */
-tr:nth-child(even) {
+.tabela-estoque tr:nth-child(even) {
   background: #f5f7fa;
 }
 
-tr:hover {
+.tabela-estoque tr:hover {
   background: #e3f2fd;
 }
 
-/* EDITÁVEL */
+/* CAMPOS EDITÁVEIS */
 td[contenteditable="true"] {
   background: #fff3cd;
+  cursor: text;
 }
 
 /* BOTÃO REMOVER */
