@@ -1,127 +1,808 @@
+*/* =========================
+   CONFIGURAÇÕES GERAIS
+========================= */
+
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 body {
-  font-family: Arial;
-  height: 100vh;
-  background: linear-gradient(135deg, #141e30, #243b55);
+    font-family: Arial, Helvetica, sans-serif;
+
+    background: #f4f7fb;
+
+    color: #172033;
+
+    min-height: 100vh;
 }
+
+
+/* =========================
+   TOPO
+========================= */
+
+.topbar {
+
+    height: 76px;
+
+    background: #ffffff;
+
+    border-bottom: 1px solid #e6eaf0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 0 45px;
+
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+
+.logo-area {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 13px;
+}
+
+
+.logo-icon {
+
+    width: 45px;
+
+    height: 45px;
+
+    border-radius: 12px;
+
+    background: #2563eb;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 22px;
+
+    color: white;
+}
+
+
+.logo-area h1 {
+
+    font-size: 21px;
+
+    font-weight: 700;
+
+    color: #172033;
+}
+
+
+.logo-area h1 span {
+
+    color: #2563eb;
+}
+
+
+.logo-area p {
+
+    color: #7b8494;
+
+    font-size: 12px;
+
+    margin-top: 2px;
+}
+
+
+.status {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    font-size: 13px;
+
+    color: #5f6b7a;
+}
+
+
+.status-dot {
+
+    width: 9px;
+
+    height: 9px;
+
+    border-radius: 50%;
+
+    background: #22c55e;
+}
+
+
+/* =========================
+   CONTAINER
+========================= */
 
 .container {
-  height: 100vh;
-  padding: 20px;
+
+    max-width: 1250px;
+
+    margin: auto;
+
+    padding: 35px 25px 60px;
 }
 
-.layout {
-  display: flex;
-  gap: 20px;
-  height: 100%;
+
+.page-title {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-end;
+
+    margin-bottom: 25px;
 }
 
-/* ESQUERDA */
-.painel-esquerdo {
-  width: 35%;
-  background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(10px);
-  padding: 15px;
-  border-radius: 10px;
-  color: white;
+
+.page-title h2 {
+
+    font-size: 27px;
+
+    margin-bottom: 7px;
 }
 
-/* DIREITA */
-.painel-direito {
-  width: 65%;
-  background: #ffffff;
-  padding: 20px;
-  border-radius: 10px;
-  overflow-y: auto;
+
+.page-title p {
+
+    color: #7b8494;
+
+    font-size: 14px;
 }
+
+
+.date {
+
+    color: #7b8494;
+
+    font-size: 13px;
+}
+
+
+/* =========================
+   CARDS
+========================= */
+
+.dashboard {
+
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 18px;
+
+    margin-bottom: 22px;
+}
+
+
+.card {
+
+    background: white;
+
+    border: 1px solid #e6eaf0;
+
+    border-radius: 14px;
+
+    padding: 21px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 16px;
+
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+
+    transition: 0.2s;
+}
+
+
+.card:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 8px 20px rgba(0,0,0,0.07);
+}
+
+
+.card-icon {
+
+    width: 48px;
+
+    height: 48px;
+
+    border-radius: 12px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 21px;
+}
+
+
+.card-icon.blue {
+
+    background: #e8f0ff;
+
+    color: #2563eb;
+}
+
+
+.card-icon.green {
+
+    background: #e8f8ee;
+
+    color: #16a34a;
+}
+
+
+.card-icon.orange {
+
+    background: #fff4df;
+
+    color: #ea8a00;
+}
+
+
+.card p {
+
+    color: #7b8494;
+
+    font-size: 13px;
+
+    margin-bottom: 5px;
+}
+
+
+.card strong {
+
+    font-size: 24px;
+}
+
+
+/* =========================
+   GRID
+========================= */
+
+.content-grid {
+
+    display: grid;
+
+    grid-template-columns: 1.25fr 1fr;
+
+    gap: 20px;
+
+    margin-bottom: 20px;
+}
+
+
+/* =========================
+   PAINÉIS
+========================= */
+
+.panel {
+
+    background: #ffffff;
+
+    border: 1px solid #e5e9f0;
+
+    border-radius: 15px;
+
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+
+    overflow: hidden;
+}
+
+
+.panel-header {
+
+    padding: 20px 22px;
+
+    border-bottom: 1px solid #edf0f4;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+}
+
+
+.panel-header h3 {
+
+    font-size: 16px;
+
+    margin-bottom: 5px;
+}
+
+
+.panel-header p {
+
+    font-size: 12px;
+
+    color: #8a94a4;
+}
+
+
+/* =========================
+   SCANNER
+========================= */
+
+.scanner-container {
+
+    padding: 20px;
+
+    background: #fafbfc;
+}
+
 
 #scanner {
-  width: 100%;
-  height: 250px;
-  background: black;
-  margin-bottom: 10px;
-}
 
-.form-tabela {
-  width: 100%;
-  color: white;
-}
-
-.form-tabela td {
-  padding: 6px;
-}
-
-input {
-  width: 100%;
-  padding: 10px;
-  border-radius: 6px;
-  border: none;
-}
-
-/* BOTÕES */
-button {
-  width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-  border: none;
-  border-radius: 6px;
-  color: white;
-  cursor: pointer;
-}
-
-button[onclick*="entrada"] {
-  background: #28a745;
-}
-
-button[onclick*="saida"] {
-  background: #dc3545;
-}
-
-/* BUSCA */
-.input-busca {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 15px;
-  border-radius: 8px;
-  border: none;
-  font-size: 16px;
-}
-
-/* TABELA */
-.tabela-estoque {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 18px;
-}
-
-.tabela-estoque th {
-  background: #243b55;
-  color: white;
-  padding: 12px;
-}
-
-.tabela-estoque td {
-  padding: 12px;
-  border-bottom: 1px solid #ddd;
-}
-
-.tabela-estoque tr:hover {
-  background: #f1f1f1;
-}
-
-/* RESPONSIVO */
-@media (max-width: 900px) {
-  .layout {
-    flex-direction: column;
-  }
-
-  .painel-esquerdo,
-  .painel-direito {
     width: 100%;
-  }
+
+    min-height: 290px;
+
+    border: 2px dashed #cdd5e1;
+
+    border-radius: 12px;
+
+    overflow: hidden;
+
+    background: #111827;
+}
+
+
+/* Ajustes da biblioteca do scanner */
+
+#scanner video {
+
+    width: 100% !important;
+
+    height: 290px !important;
+
+    object-fit: cover;
+}
+
+
+#scanner button {
+
+    background: #2563eb !important;
+
+    color: white !important;
+
+    border: none !important;
+
+    border-radius: 7px !important;
+
+    padding: 8px 14px !important;
+
+    cursor: pointer;
+}
+
+
+#scanner select {
+
+    padding: 7px;
+
+    border-radius: 6px;
+
+    border: 1px solid #ddd;
+}
+
+
+.scanner-status {
+
+    background: #e8f8ee;
+
+    color: #16a34a;
+
+    padding: 5px 10px;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+
+    font-weight: bold;
+}
+
+
+.scanner-info {
+
+    padding: 12px 20px;
+
+    color: #7b8494;
+
+    font-size: 12px;
+
+    border-top: 1px solid #edf0f4;
+}
+
+
+.scanner-info span {
+
+    color: #22c55e;
+
+    margin-right: 5px;
+}
+
+
+/* =========================
+   FORMULÁRIO
+========================= */
+
+form {
+
+    padding: 22px;
+}
+
+
+.form-group {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+
+    margin-bottom: 17px;
+}
+
+
+.form-group label {
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    color: #465166;
+}
+
+
+.form-group input {
+
+    height: 42px;
+
+    border: 1px solid #dce1e8;
+
+    border-radius: 8px;
+
+    padding: 0 12px;
+
+    font-size: 13px;
+
+    outline: none;
+
+    transition: 0.2s;
+}
+
+
+.form-group input:focus {
+
+    border-color: #2563eb;
+
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+
+
+.form-row {
+
+    display: grid;
+
+    grid-template-columns: 1fr 120px;
+
+    gap: 12px;
+}
+
+
+.btn-primary {
+
+    width: 100%;
+
+    height: 44px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: #2563eb;
+
+    color: white;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+
+.btn-primary:hover {
+
+    background: #1d4ed8;
+
+    transform: translateY(-1px);
+}
+
+
+/* =========================
+   ESTOQUE
+========================= */
+
+.estoque-header {
+
+    padding: 20px 22px;
+}
+
+
+.search-box {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    border: 1px solid #dce1e8;
+
+    border-radius: 8px;
+
+    padding: 0 10px;
+
+    width: 230px;
+
+    height: 38px;
+}
+
+
+.search-box span {
+
+    font-size: 20px;
+
+    color: #8b95a5;
+}
+
+
+.search-box input {
+
+    border: none;
+
+    outline: none;
+
+    width: 100%;
+
+    font-size: 12px;
+}
+
+
+.table-container {
+
+    overflow-x: auto;
+}
+
+
+table {
+
+    width: 100%;
+
+    border-collapse: collapse;
+}
+
+
+thead {
+
+    background: #f8fafc;
+}
+
+
+th {
+
+    text-align: left;
+
+    padding: 13px 20px;
+
+    color: #7b8494;
+
+    font-size: 11px;
+
+    text-transform: uppercase;
+
+    letter-spacing: .5px;
+}
+
+
+td {
+
+    padding: 14px 20px;
+
+    border-top: 1px solid #edf0f4;
+
+    font-size: 13px;
+
+    color: #4d586b;
+}
+
+
+.produto {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    font-weight: 600;
+
+    color: #172033;
+}
+
+
+.produto-icon {
+
+    width: 34px;
+
+    height: 34px;
+
+    border-radius: 8px;
+
+    background: #f0f4f8;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+}
+
+
+/* =========================
+   BADGES
+========================= */
+
+.badge {
+
+    display: inline-block;
+
+    padding: 5px 9px;
+
+    border-radius: 20px;
+
+    font-size: 10px;
+
+    font-weight: 600;
+}
+
+
+.disponivel {
+
+    background: #e9f8ef;
+
+    color: #159447;
+}
+
+
+.baixo {
+
+    background: #fff1df;
+
+    color: #d97706;
+}
+
+
+/* =========================
+   BOTÃO EXCLUIR
+========================= */
+
+.btn-delete {
+
+    width: 30px;
+
+    height: 30px;
+
+    border: none;
+
+    background: #fff1f2;
+
+    color: #e11d48;
+
+    border-radius: 7px;
+
+    cursor: pointer;
+
+    transition: .2s;
+}
+
+
+.btn-delete:hover {
+
+    background: #ffe4e6;
+
+    transform: scale(1.05);
+}
+
+
+/* =========================
+   RESPONSIVIDADE
+========================= */
+
+@media (max-width: 900px) {
+
+    .content-grid {
+
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard {
+
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .topbar {
+
+        padding: 0 18px;
+    }
+
+    .status {
+
+        display: none;
+    }
+
+    .container {
+
+        padding: 25px 15px;
+    }
+
+    .page-title {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 10px;
+    }
+
+    .form-row {
+
+        grid-template-columns: 1fr;
+    }
+
+    .estoque-header {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 15px;
+    }
+
+    .search-box {
+
+        width: 100%;
+    }
+
 }

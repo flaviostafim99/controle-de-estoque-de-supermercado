@@ -1,191 +1,331 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
+
 <head>
-  <meta charset="UTF-8">
-  <title>Controle de Estoque</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="stylesheet" href="style.css">
+    <title>Controle de Estoque</title>
 
-  <!-- Scanner -->
-  <script src="https://unpkg.com/html5-qrcode"></script>
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Biblioteca do scanner -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
 
 <body>
 
-<div class="container">
-  <div class="layout">
+    <!-- CABEÇALHO -->
+    <header class="topbar">
 
-    <!-- ESQUERDA -->
-    <div class="painel-esquerdo">
+        <div class="logo-area">
+            <div class="logo-icon">📦</div>
 
-      <h2>📷 Scanner</h2>
+            <div>
+                <h1>Stock<span>Manager</span></h1>
+                <p>Controle de Estoque</p>
+            </div>
+        </div>
 
-      <div id="scanner"></div>
+        <div class="status">
+            <span class="status-dot"></span>
+            Sistema online
+        </div>
 
-      <table class="form-tabela">
-        <tr>
-          <td>Nome:</td>
-          <td><input type="text" id="nome"></td>
-        </tr>
-        <tr>
-          <td>Código:</td>
-          <td><input type="text" id="codigo"></td>
-        </tr>
-        <tr>
-          <td>Quantidade:</td>
-          <td><input type="number" id="quantidade"></td>
-        </tr>
-      </table>
+    </header>
 
-      <button onclick="registrar('entrada')">Entrada ➕</button>
-      <button onclick="registrar('saida')">Saída ➖</button>
 
-    </div>
+    <!-- CONTEÚDO -->
+    <main class="container">
 
-    <!-- DIREITA -->
-    <div class="painel-direito">
+        <div class="page-title">
+            <div>
+                <h2>Controle de Estoque</h2>
+                <p>Gerencie produtos e consulte o estoque através do scanner.</p>
+            </div>
 
-      <h2>📋 Estoque de Produtos</h2>
+            <div class="date" id="dataAtual"></div>
+        </div>
 
-      <!-- BUSCA -->
-      <input 
-        type="text" 
-        id="busca" 
-        placeholder="🔍 Buscar produto..."
-        onkeyup="filtrarTabela()"
-        class="input-busca"
-      >
 
-      <table class="tabela-estoque">
-        <thead>
-          <tr>
-            <th>Nome</th>
-            <th>Código</th>
-            <th>Quantidade</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="tabela"></tbody>
-      </table>
+        <!-- CARDS -->
+        <section class="dashboard">
 
-    </div>
+            <div class="card">
+                <div class="card-icon blue">📦</div>
 
-  </div>
-</div>
+                <div>
+                    <p>Total de produtos</p>
+                    <strong id="totalProdutos">6</strong>
+                </div>
+            </div>
 
-<script>
-let estoque = JSON.parse(localStorage.getItem("estoque")) || {};
+            <div class="card">
+                <div class="card-icon green">✓</div>
 
-function salvar() {
-  localStorage.setItem("estoque", JSON.stringify(estoque));
-}
+                <div>
+                    <p>Produtos disponíveis</p>
+                    <strong id="produtosDisponiveis">6</strong>
+                </div>
+            </div>
 
-// SCANNER
-const html5QrCode = new Html5Qrcode("scanner");
+            <div class="card">
+                <div class="card-icon orange">⚠</div>
 
-Html5Qrcode.getCameras().then(devices => {
-  if (devices.length) {
-    html5QrCode.start(
-      devices[0].id,
-      { fps: 10, qrbox: 250 },
-      (codigo) => {
+                <div>
+                    <p>Estoque baixo</p>
+                    <strong id="estoqueBaixo">0</strong>
+                </div>
+            </div>
 
-        document.getElementById("codigo").value = codigo;
+        </section>
 
-        if (estoque[codigo]) {
-          document.getElementById("nome").value = estoque[codigo].nome;
-        }
 
-        if (navigator.vibrate) navigator.vibrate(200);
-      }
-    );
-  }
-});
+        <!-- ÁREA PRINCIPAL -->
+        <section class="content-grid">
 
-// REGISTRAR
-function registrar(tipo) {
-  let codigo = document.getElementById("codigo").value;
-  let nome = document.getElementById("nome").value;
-  let quantidade = parseInt(document.getElementById("quantidade").value);
 
-  if (!codigo || !nome || !quantidade) {
-    alert("Preencha tudo!");
-    return;
-  }
+            <!-- SCANNER -->
+            <div class="panel scanner-panel">
 
-  if (!estoque[codigo]) {
-    estoque[codigo] = { nome, quantidade: 0 };
-  }
+                <div class="panel-header">
 
-  if (tipo === 'entrada') {
-    estoque[codigo].quantidade += quantidade;
-  } else {
-    estoque[codigo].quantidade -= quantidade;
-  }
+                    <div>
+                        <h3>📷 Scanner</h3>
+                        <p>Aponte a câmera para o código de barras</p>
+                    </div>
 
-  salvar();
-  atualizarTabela();
-}
+                    <span class="scanner-status">
+                        Pronto
+                    </span>
 
-// TABELA
-function atualizarTabela() {
-  let tabela = document.getElementById("tabela");
-  tabela.innerHTML = "";
+                </div>
 
-  for (let codigo in estoque) {
-    let item = estoque[codigo];
 
-    tabela.innerHTML += `
-      <tr>
-        <td contenteditable="true" onblur="editarNome('${codigo}', this.innerText)">
-          ${item.nome}
-        </td>
-        <td>${codigo}</td>
-        <td contenteditable="true" onblur="editarQuantidade('${codigo}', this.innerText)">
-          ${item.quantidade}
-        </td>
-        <td><button onclick="remover('${codigo}')">❌</button></td>
-      </tr>
-    `;
-  }
-}
+                <div class="scanner-container">
 
-// BUSCA
-function filtrarTabela() {
-  let busca = document.getElementById("busca").value.toLowerCase();
-  let linhas = document.querySelectorAll("#tabela tr");
+                    <div id="scanner"></div>
 
-  linhas.forEach(linha => {
-    let nome = linha.children[0].innerText.toLowerCase();
-    let codigo = linha.children[1].innerText.toLowerCase();
+                </div>
 
-    linha.style.display = 
-      nome.includes(busca) || codigo.includes(busca)
-      ? "" : "none";
-  });
-}
 
-// EDITAR
-function editarNome(codigo, valor) {
-  estoque[codigo].nome = valor;
-  salvar();
-}
+                <div class="scanner-info">
+                    <span>●</span>
+                    Aguardando leitura do código...
+                </div>
 
-function editarQuantidade(codigo, valor) {
-  estoque[codigo].quantidade = parseInt(valor) || 0;
-  salvar();
-}
+            </div>
 
-// REMOVER
-function remover(codigo) {
-  delete estoque[codigo];
-  salvar();
-  atualizarTabela();
-}
 
-// INICIAR
-atualizarTabela();
-</script>
+            <!-- CADASTRO -->
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <div>
+                        <h3>➕ Produto</h3>
+                        <p>Adicione ou atualize um produto</p>
+                    </div>
+
+                </div>
+
+
+                <form id="produtoForm">
+
+                    <div class="form-group">
+                        <label for="nome">Nome do produto</label>
+
+                        <input
+                            type="text"
+                            id="nome"
+                            placeholder="Ex.: Arroz 5kg"
+                            required
+                        >
+                    </div>
+
+
+                    <div class="form-row">
+
+                        <div class="form-group">
+                            <label for="codigo">Código de barras</label>
+
+                            <input
+                                type="text"
+                                id="codigo"
+                                placeholder="Código"
+                                required
+                            >
+                        </div>
+
+
+                        <div class="form-group">
+                            <label for="quantidade">Quantidade</label>
+
+                            <input
+                                type="number"
+                                id="quantidade"
+                                placeholder="0"
+                                min="0"
+                                required
+                            >
+                        </div>
+
+                    </div>
+
+
+                    <button type="submit" class="btn-primary">
+                        <span>＋</span>
+                        Adicionar produto
+                    </button>
+
+                </form>
+
+            </div>
+
+        </section>
+
+
+        <!-- ESTOQUE -->
+        <section class="panel estoque-panel">
+
+            <div class="panel-header estoque-header">
+
+                <div>
+                    <h3>📦 Estoque de Produtos</h3>
+                    <p>Produtos cadastrados no sistema</p>
+                </div>
+
+
+                <div class="search-box">
+
+                    <span>⌕</span>
+
+                    <input
+                        type="text"
+                        id="pesquisa"
+                        placeholder="Buscar produto..."
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>Produto</th>
+                            <th>Código</th>
+                            <th>Quantidade</th>
+                            <th>Status</th>
+                            <th>Ação</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="listaProdutos">
+
+                        <tr>
+                            <td>
+                                <div class="produto">
+                                    <div class="produto-icon">🍚</div>
+                                    <span>Arroz</span>
+                                </div>
+                            </td>
+
+                            <td>78986413601717</td>
+
+                            <td>
+                                <strong>12</strong>
+                            </td>
+
+                            <td>
+                                <span class="badge disponivel">
+                                    Disponível
+                                </span>
+                            </td>
+
+                            <td>
+                                <button class="btn-delete">
+                                    🗑
+                                </button>
+                            </td>
+                        </tr>
+
+
+                        <tr>
+                            <td>
+                                <div class="produto">
+                                    <div class="produto-icon">🥛</div>
+                                    <span>Leite</span>
+                                </div>
+                            </td>
+
+                            <td>78945626007817</td>
+
+                            <td>
+                                <strong>7</strong>
+                            </td>
+
+                            <td>
+                                <span class="badge disponivel">
+                                    Disponível
+                                </span>
+                            </td>
+
+                            <td>
+                                <button class="btn-delete">
+                                    🗑
+                                </button>
+                            </td>
+                        </tr>
+
+
+                        <tr>
+                            <td>
+                                <div class="produto">
+                                    <div class="produto-icon">🍗</div>
+                                    <span>Frango</span>
+                                </div>
+                            </td>
+
+                            <td>789284800032</td>
+
+                            <td>
+                                <strong>3</strong>
+                            </td>
+
+                            <td>
+                                <span class="badge baixo">
+                                    Estoque baixo
+                                </span>
+                            </td>
+
+                            <td>
+                                <button class="btn-delete">
+                                    🗑
+                                </button>
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- JAVASCRIPT -->
+    <script src="script.js"></script>
 
 </body>
 </html>

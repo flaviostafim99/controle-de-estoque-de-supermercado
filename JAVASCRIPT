@@ -1,15 +1,408 @@
-function filtrarTabela() {
-  let busca = document.getElementById("busca").value.toLowerCase();
-  let linhas = document.querySelectorAll("#tabela tr");
+/* =========================
+   PRODUTOS
+========================= */
 
-  linhas.forEach(linha => {
-    let nome = linha.children[0].innerText.toLowerCase();
-    let codigo = linha.children[1].innerText.toLowerCase();
+let produtos = [
+    {
+        nome: "Arroz",
+        codigo: "78986413601717",
+        quantidade: 12,
+        icone: "🍚"
+    },
 
-    if (nome.includes(busca) || codigo.includes(busca)) {
-      linha.style.display = "";
-    } else {
-      linha.style.display = "none";
+    {
+        nome: "Leite",
+        codigo: "78945626007817",
+        quantidade: 7,
+        icone: "🥛"
+    },
+
+    {
+        nome: "Frango",
+        codigo: "789284800032",
+        quantidade: 3,
+        icone: "🍗"
     }
-  });
+];
+
+
+/* =========================
+   ELEMENTOS
+========================= */
+
+const listaProdutos =
+    document.getElementById("listaProdutos");
+
+const form =
+    document.getElementById("produtoForm");
+
+const pesquisa =
+    document.getElementById("pesquisa");
+
+const codigo =
+    document.getElementById("codigo");
+
+const nome =
+    document.getElementById("nome");
+
+const quantidade =
+    document.getElementById("quantidade");
+
+
+/* =========================
+   DATA
+========================= */
+
+function mostrarData() {
+
+    const data = new Date();
+
+    const texto = data.toLocaleDateString(
+        "pt-BR",
+        {
+            weekday: "long",
+            day: "2-digit",
+            month: "long",
+            year: "numeric"
+        }
+    );
+
+    document.getElementById("dataAtual").textContent =
+        texto;
 }
+
+mostrarData();
+
+
+/* =========================
+   MOSTRAR PRODUTOS
+========================= */
+
+function mostrarProdutos(filtro = "") {
+
+    listaProdutos.innerHTML = "";
+
+    const produtosFiltrados =
+        produtos.filter(produto =>
+
+            produto.nome
+                .toLowerCase()
+                .includes(filtro.toLowerCase())
+
+            ||
+
+            produto.codigo.includes(filtro)
+        );
+
+
+    produtosFiltrados.forEach((produto, index) => {
+
+        const tr = document.createElement("tr");
+
+
+        let status = "Disponível";
+
+        let classe = "disponivel";
+
+
+        if (produto.quantidade <= 3) {
+
+            status = "Estoque baixo";
+
+            classe = "baixo";
+
+        }
+
+
+        tr.innerHTML = `
+
+            <td>
+
+                <div class="produto">
+
+                    <div class="produto-icon">
+                        ${produto.icone}
+                    </div>
+
+                    <span>
+                        ${produto.nome}
+                    </span>
+
+                </div>
+
+            </td>
+
+
+            <td>
+                ${produto.codigo}
+            </td>
+
+
+            <td>
+                <strong>
+                    ${produto.quantidade}
+                </strong>
+            </td>
+
+
+            <td>
+
+                <span class="badge ${classe}">
+                    ${status}
+                </span>
+
+            </td>
+
+
+            <td>
+
+                <button
+                    class="btn-delete"
+                    onclick="excluirProduto(${index})"
+                >
+                    🗑
+                </button>
+
+            </td>
+
+        `;
+
+
+        listaProdutos.appendChild(tr);
+
+    });
+
+
+    atualizarDashboard();
+
+}
+
+
+/* =========================
+   DASHBOARD
+========================= */
+
+function atualizarDashboard() {
+
+    const total =
+        produtos.length;
+
+
+    const disponiveis =
+        produtos.filter(
+            produto => produto.quantidade > 3
+        ).length;
+
+
+    const baixo =
+        produtos.filter(
+            produto => produto.quantidade <= 3
+        ).length;
+
+
+    document.getElementById(
+        "totalProdutos"
+    ).textContent = total;
+
+
+    document.getElementById(
+        "produtosDisponiveis"
+    ).textContent = disponiveis;
+
+
+    document.getElementById(
+        "estoqueBaixo"
+    ).textContent = baixo;
+
+}
+
+
+/* =========================
+   ADICIONAR PRODUTO
+========================= */
+
+form.addEventListener(
+    "submit",
+    function(event) {
+
+        event.preventDefault();
+
+
+        const novoProduto = {
+
+            nome: nome.value,
+
+            codigo: codigo.value,
+
+            quantidade:
+                Number(quantidade.value),
+
+            icone: "📦"
+
+        };
+
+
+        const produtoExistente =
+            produtos.find(
+                produto =>
+                    produto.codigo === novoProduto.codigo
+            );
+
+
+        if (produtoExistente) {
+
+            produtoExistente.quantidade +=
+                novoProduto.quantidade;
+
+        } else {
+
+            produtos.push(novoProduto);
+
+        }
+
+
+        mostrarProdutos();
+
+
+        form.reset();
+
+
+        alert(
+            "Produto adicionado com sucesso!"
+        );
+
+    }
+);
+
+
+/* =========================
+   EXCLUIR
+========================= */
+
+function excluirProduto(index) {
+
+    const confirmar =
+        confirm(
+            "Deseja realmente excluir este produto?"
+        );
+
+
+    if (!confirmar) return;
+
+
+    produtos.splice(index, 1);
+
+
+    mostrarProdutos();
+
+}
+
+
+/* =========================
+   PESQUISA
+========================= */
+
+pesquisa.addEventListener(
+    "input",
+    function() {
+
+        mostrarProdutos(
+            pesquisa.value
+        );
+
+    }
+);
+
+
+/* =========================
+   SCANNER
+========================= */
+
+function iniciarScanner() {
+
+    const scanner =
+        new Html5QrcodeScanner(
+
+            "scanner",
+
+            {
+
+                fps: 10,
+
+                qrbox: {
+                    width: 280,
+                    height: 160
+                },
+
+                rememberLastUsedCamera: true
+
+            },
+
+            false
+        );
+
+
+    scanner.render(
+
+        function(codigoLido) {
+
+            console.log(
+                "Código encontrado:",
+                codigoLido
+            );
+
+
+            codigo.value =
+                codigoLido;
+
+
+            const produto =
+                produtos.find(
+                    item =>
+                        item.codigo === codigoLido
+                );
+
+
+            if (produto) {
+
+                nome.value =
+                    produto.nome;
+
+
+                quantidade.value =
+                    produto.quantidade;
+
+
+                alert(
+                    `Produto encontrado: ${produto.nome}`
+                );
+
+            } else {
+
+                alert(
+                    "Código lido! Agora informe o nome e a quantidade do produto."
+                );
+
+            }
+
+        },
+
+
+        function(error) {
+
+            // Ignora erros de leitura contínua
+
+        }
+
+    );
+
+}
+
+
+/* =========================
+   INICIAR
+========================= */
+
+mostrarProdutos();
+
+iniciarScanner();
