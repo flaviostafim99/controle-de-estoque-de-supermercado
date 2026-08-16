@@ -1,331 +1,276 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Controle de Estoque</title>
-
-    <!-- CSS -->
-    <link rel="stylesheet" href="style.css">
-
-    <!-- Biblioteca do scanner -->
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle de Estoque | Sistema de Supermercado</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-    <!-- CABEÇALHO -->
-    <header class="topbar">
+<div class="app">
 
-        <div class="logo-area">
-            <div class="logo-icon">📦</div>
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <div class="brand-icon">🛒</div>
+      <div class="brand-text">
+        <h1>Controle de Estoque</h1>
+        <span>Sistema de Supermercado</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="status-pill"><span class="dot"></span> Sistema Online</div>
+      <div class="datetime">
+        <span id="topDate">--</span>
+        <strong id="topTime">--:--</strong>
+      </div>
+      <div class="avatar" id="userAvatar" title="Usuário">👤</div>
+    </div>
+  </header>
 
-            <div>
-                <h1>Stock<span>Manager</span></h1>
-                <p>Controle de Estoque</p>
-            </div>
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <nav class="nav">
+        <button class="nav-item active" data-view="inicio">
+          <span class="nav-ico">🏠</span> Início
+        </button>
+        <button class="nav-item" data-view="produtos">
+          <span class="nav-ico">📦</span> Produtos
+        </button>
+        <button class="nav-item" data-view="estoque">
+          <span class="nav-ico">🗄️</span> Estoque
+        </button>
+        <button class="nav-item" data-view="relatorios">
+          <span class="nav-ico">📊</span> Relatórios
+        </button>
+        <button class="nav-item" data-view="config">
+          <span class="nav-ico">⚙️</span> Configurações
+        </button>
+      </nav>
+      <button class="nav-item nav-exit" id="btnSair">
+        <span class="nav-ico">↩️</span> Sair
+      </button>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="content">
+
+      <!-- STAT CARDS -->
+      <section class="stats-grid">
+        <div class="stat-card stat-blue">
+          <div class="stat-ico">📦</div>
+          <div class="stat-info">
+            <span>Total de Produtos</span>
+            <strong id="statTotal">0</strong>
+          </div>
         </div>
-
-        <div class="status">
-            <span class="status-dot"></span>
-            Sistema online
+        <div class="stat-card stat-green">
+          <div class="stat-ico">✅</div>
+          <div class="stat-info">
+            <span>Disponíveis</span>
+            <strong id="statDisponiveis">0</strong>
+          </div>
         </div>
-
-    </header>
-
-
-    <!-- CONTEÚDO -->
-    <main class="container">
-
-        <div class="page-title">
-            <div>
-                <h2>Controle de Estoque</h2>
-                <p>Gerencie produtos e consulte o estoque através do scanner.</p>
-            </div>
-
-            <div class="date" id="dataAtual"></div>
+        <div class="stat-card stat-orange">
+          <div class="stat-ico">⚠️</div>
+          <div class="stat-info">
+            <span>Estoque Baixo</span>
+            <strong id="statBaixo">0</strong>
+          </div>
         </div>
+        <div class="stat-card stat-purple">
+          <div class="stat-ico">🛒</div>
+          <div class="stat-info">
+            <span>Vendas Hoje</span>
+            <strong id="statVendas">R$ 0,00</strong>
+          </div>
+        </div>
+      </section>
 
+      <!-- VIEW: INÍCIO -->
+      <section class="view active" id="view-inicio">
+        <div class="grid-3">
 
-        <!-- CARDS -->
-        <section class="dashboard">
+          <!-- CADASTRO -->
+          <div class="panel">
+            <div class="panel-header">
+              <span class="panel-ico">📦</span> Cadastro de Produto
+            </div>
+            <div class="panel-body">
+              <form id="formProduto" novalidate>
+                <label>Nome do produto</label>
+                <input type="text" id="inputNome" placeholder="Digite o nome do produto" autocomplete="off" required>
 
-            <div class="card">
-                <div class="card-icon blue">📦</div>
+                <label>Código de barras</label>
+                <input type="text" id="inputCodigo" placeholder="Digite o código" autocomplete="off" required>
 
-                <div>
-                    <p>Total de produtos</p>
-                    <strong id="totalProdutos">6</strong>
+                <label>Quantidade</label>
+                <input type="number" id="inputQtd" placeholder="Digite a quantidade" min="0" step="1" required>
+
+                <button type="submit" class="btn-primary" id="btnAdicionar">
+                  <span>+</span> Adicionar produto
+                </button>
+                <p class="form-msg" id="formMsg"></p>
+              </form>
+            </div>
+          </div>
+
+          <!-- SCANNER -->
+          <div class="panel panel-dark">
+            <div class="panel-header">
+              <span class="panel-ico">|||▮</span> Scanner de Código de Barras
+              <span class="badge-status" id="scannerBadge">Pronto para leitura</span>
+            </div>
+            <div class="scanner-body">
+              <video id="scannerVideo" autoplay playsinline muted></video>
+              <div class="scan-placeholder" id="scanPlaceholder">
+                <div class="shelf-illustration">
+                  <div class="shelf"></div>
+                  <div class="shelf"></div>
+                  <div class="shelf"></div>
                 </div>
+                <button class="btn-scan" id="btnAtivarCamera">📷 Ativar câmera</button>
+              </div>
+              <div class="scan-frame" id="scanFrame" hidden>
+                <span class="corner tl"></span><span class="corner tr"></span>
+                <span class="corner bl"></span><span class="corner br"></span>
+              </div>
+            </div>
+            <div class="scanner-footer" id="scannerFooterText">
+              📷 Aponte a câmera para o código de barras
+            </div>
+          </div>
+
+          <!-- ESTOQUE RECENTE -->
+          <div class="panel">
+            <div class="panel-header">
+              <span class="panel-ico">📦</span> Estoque Recente
+            </div>
+            <div class="panel-body">
+              <input type="text" id="buscaProduto" class="search-input" placeholder="🔎 Buscar produto...">
+              <table class="tbl">
+                <thead>
+                  <tr><th>Produto</th><th>Qtd</th><th>Status</th></tr>
+                </thead>
+                <tbody id="tabelaRecente"></tbody>
+              </table>
+              <p class="empty-msg" id="recenteEmpty" hidden>Nenhum produto cadastrado ainda.</p>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- VIEW: PRODUTOS -->
+      <section class="view" id="view-produtos">
+        <div class="panel">
+          <div class="panel-header"><span class="panel-ico">📦</span> Todos os Produtos</div>
+          <div class="panel-body">
+            <input type="text" id="buscaProdutosView" class="search-input" placeholder="🔎 Buscar por nome ou código...">
+            <table class="tbl">
+              <thead>
+                <tr><th>Produto</th><th>Código</th><th>Qtd</th><th>Status</th><th>Ações</th></tr>
+              </thead>
+              <tbody id="tabelaProdutos"></tbody>
+            </table>
+            <p class="empty-msg" id="produtosEmpty" hidden>Nenhum produto encontrado.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: ESTOQUE -->
+      <section class="view" id="view-estoque">
+        <div class="panel">
+          <div class="panel-header"><span class="panel-ico">🗄️</span> Movimentação de Estoque</div>
+          <div class="panel-body">
+            <table class="tbl">
+              <thead>
+                <tr><th>Produto</th><th>Qtd atual</th><th>Ajustar</th><th>Status</th></tr>
+              </thead>
+              <tbody id="tabelaEstoque"></tbody>
+            </table>
+            <p class="empty-msg" id="estoqueEmpty" hidden>Nenhum produto cadastrado ainda.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: RELATÓRIOS -->
+      <section class="view" id="view-relatorios">
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-header"><span class="panel-ico">📊</span> Resumo Geral</div>
+            <div class="panel-body">
+              <ul class="report-list" id="reportResumo"></ul>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><span class="panel-ico">⚠️</span> Produtos com Estoque Baixo</div>
+            <div class="panel-body">
+              <table class="tbl">
+                <thead><tr><th>Produto</th><th>Qtd</th></tr></thead>
+                <tbody id="tabelaBaixoEstoque"></tbody>
+              </table>
+              <p class="empty-msg" id="baixoEmpty" hidden>Nenhum produto com estoque baixo. 🎉</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: CONFIGURAÇÕES -->
+      <section class="view" id="view-config">
+        <div class="panel">
+          <div class="panel-header"><span class="panel-ico">⚙️</span> Configurações</div>
+          <div class="panel-body config-body">
+
+            <div class="config-row">
+              <label>Vendas de hoje (R$)</label>
+              <div class="config-inline">
+                <input type="number" id="inputVendas" min="0" step="0.01">
+                <button class="btn-secondary" id="btnSalvarVendas">Salvar</button>
+              </div>
             </div>
 
-            <div class="card">
-                <div class="card-icon green">✓</div>
-
-                <div>
-                    <p>Produtos disponíveis</p>
-                    <strong id="produtosDisponiveis">6</strong>
-                </div>
+            <div class="config-row">
+              <label>Limite para "Estoque Baixo"</label>
+              <div class="config-inline">
+                <input type="number" id="inputLimite" min="0" step="1">
+                <button class="btn-secondary" id="btnSalvarLimite">Salvar</button>
+              </div>
             </div>
 
-            <div class="card">
-                <div class="card-icon orange">⚠</div>
-
-                <div>
-                    <p>Estoque baixo</p>
-                    <strong id="estoqueBaixo">0</strong>
-                </div>
+            <div class="config-row">
+              <label>Dados</label>
+              <div class="config-inline">
+                <button class="btn-secondary" id="btnExportar">⬇️ Exportar dados (JSON)</button>
+                <label class="btn-secondary file-label">
+                  ⬆️ Importar dados
+                  <input type="file" id="inputImportar" accept="application/json" hidden>
+                </label>
+                <button class="btn-danger" id="btnResetar">🗑️ Restaurar padrão</button>
+              </div>
             </div>
 
-        </section>
-
-
-        <!-- ÁREA PRINCIPAL -->
-        <section class="content-grid">
-
-
-            <!-- SCANNER -->
-            <div class="panel scanner-panel">
-
-                <div class="panel-header">
-
-                    <div>
-                        <h3>📷 Scanner</h3>
-                        <p>Aponte a câmera para o código de barras</p>
-                    </div>
-
-                    <span class="scanner-status">
-                        Pronto
-                    </span>
-
-                </div>
-
-
-                <div class="scanner-container">
-
-                    <div id="scanner"></div>
-
-                </div>
-
-
-                <div class="scanner-info">
-                    <span>●</span>
-                    Aguardando leitura do código...
-                </div>
-
-            </div>
-
-
-            <!-- CADASTRO -->
-            <div class="panel">
-
-                <div class="panel-header">
-
-                    <div>
-                        <h3>➕ Produto</h3>
-                        <p>Adicione ou atualize um produto</p>
-                    </div>
-
-                </div>
-
-
-                <form id="produtoForm">
-
-                    <div class="form-group">
-                        <label for="nome">Nome do produto</label>
-
-                        <input
-                            type="text"
-                            id="nome"
-                            placeholder="Ex.: Arroz 5kg"
-                            required
-                        >
-                    </div>
-
-
-                    <div class="form-row">
-
-                        <div class="form-group">
-                            <label for="codigo">Código de barras</label>
-
-                            <input
-                                type="text"
-                                id="codigo"
-                                placeholder="Código"
-                                required
-                            >
-                        </div>
-
-
-                        <div class="form-group">
-                            <label for="quantidade">Quantidade</label>
-
-                            <input
-                                type="number"
-                                id="quantidade"
-                                placeholder="0"
-                                min="0"
-                                required
-                            >
-                        </div>
-
-                    </div>
-
-
-                    <button type="submit" class="btn-primary">
-                        <span>＋</span>
-                        Adicionar produto
-                    </button>
-
-                </form>
-
-            </div>
-
-        </section>
-
-
-        <!-- ESTOQUE -->
-        <section class="panel estoque-panel">
-
-            <div class="panel-header estoque-header">
-
-                <div>
-                    <h3>📦 Estoque de Produtos</h3>
-                    <p>Produtos cadastrados no sistema</p>
-                </div>
-
-
-                <div class="search-box">
-
-                    <span>⌕</span>
-
-                    <input
-                        type="text"
-                        id="pesquisa"
-                        placeholder="Buscar produto..."
-                    >
-
-                </div>
-
-            </div>
-
-
-            <div class="table-container">
-
-                <table>
-
-                    <thead>
-
-                        <tr>
-                            <th>Produto</th>
-                            <th>Código</th>
-                            <th>Quantidade</th>
-                            <th>Status</th>
-                            <th>Ação</th>
-                        </tr>
-
-                    </thead>
-
-                    <tbody id="listaProdutos">
-
-                        <tr>
-                            <td>
-                                <div class="produto">
-                                    <div class="produto-icon">🍚</div>
-                                    <span>Arroz</span>
-                                </div>
-                            </td>
-
-                            <td>78986413601717</td>
-
-                            <td>
-                                <strong>12</strong>
-                            </td>
-
-                            <td>
-                                <span class="badge disponivel">
-                                    Disponível
-                                </span>
-                            </td>
-
-                            <td>
-                                <button class="btn-delete">
-                                    🗑
-                                </button>
-                            </td>
-                        </tr>
-
-
-                        <tr>
-                            <td>
-                                <div class="produto">
-                                    <div class="produto-icon">🥛</div>
-                                    <span>Leite</span>
-                                </div>
-                            </td>
-
-                            <td>78945626007817</td>
-
-                            <td>
-                                <strong>7</strong>
-                            </td>
-
-                            <td>
-                                <span class="badge disponivel">
-                                    Disponível
-                                </span>
-                            </td>
-
-                            <td>
-                                <button class="btn-delete">
-                                    🗑
-                                </button>
-                            </td>
-                        </tr>
-
-
-                        <tr>
-                            <td>
-                                <div class="produto">
-                                    <div class="produto-icon">🍗</div>
-                                    <span>Frango</span>
-                                </div>
-                            </td>
-
-                            <td>789284800032</td>
-
-                            <td>
-                                <strong>3</strong>
-                            </td>
-
-                            <td>
-                                <span class="badge baixo">
-                                    Estoque baixo
-                                </span>
-                            </td>
-
-                            <td>
-                                <button class="btn-delete">
-                                    🗑
-                                </button>
-                            </td>
-                        </tr>
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </section>
+            <p class="form-msg" id="configMsg"></p>
+          </div>
+        </div>
+      </section>
 
     </main>
+  </div>
 
+  <footer class="footer">
+    <span>🛒 © 2026 Controle de Estoque - Supermercado. Todos os direitos reservados.</span>
+    <span>Tecnologia para um negócio mais eficiente. ♥</span>
+  </footer>
+</div>
 
-    <!-- JAVASCRIPT -->
-    <script src="script.js"></script>
+<div class="toast" id="toast"></div>
 
+<script src="script.js"></script>
 </body>
 </html>

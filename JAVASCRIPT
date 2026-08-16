@@ -1,408 +1,498 @@
-/* =========================
-   PRODUTOS
-========================= */
+(function () {
+  "use strict";
 
-let produtos = [
-    {
-        nome: "Arroz",
-        codigo: "78986413601717",
-        quantidade: 12,
-        icone: "🍚"
-    },
+  /* ============ STORAGE KEYS ============ */
+  const KEY_PRODUTOS = "estoque_produtos_v1";
+  const KEY_VENDAS = "estoque_vendas_v1";
+  const KEY_LIMITE = "estoque_limite_v1";
 
-    {
-        nome: "Leite",
-        codigo: "78945626007817",
-        quantidade: 7,
-        icone: "🥛"
-    },
+  const SEED = [
+    { nome: "Arroz 5kg", codigo: "7891234560012", quantidade: 12 },
+    { nome: "Leite 1L", codigo: "7891234560029", quantidade: 6 },
+    { nome: "Feijão 1kg", codigo: "7891234560036", quantidade: 3 },
+    { nome: "Óleo 900ml", codigo: "7891234560043", quantidade: 8 },
+    { nome: "Açúcar 1kg", codigo: "7891234560050", quantidade: 5 }
+  ];
 
-    {
-        nome: "Frango",
-        codigo: "789284800032",
-        quantidade: 3,
-        icone: "🍗"
+  /* ============ STATE ============ */
+  let produtos = [];
+  let vendasHoje = 1248.90;
+  let limiteBaixo = 5;
+
+  /* ============ HELPERS ============ */
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => document.querySelectorAll(sel);
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+  function money(v) {
+    return "R$ " + Number(v).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function statusOf(qtd) {
+    if (qtd <= 0) return { label: "Sem estoque", cls: "out" };
+    if (qtd <= limiteBaixo) return { label: "Estoque baixo", cls: "low" };
+    return { label: "Disponível", cls: "ok" };
+  }
+
+  function toast(msg) {
+    const t = $("#toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => t.classList.remove("show"), 2600);
+  }
+
+  function save() {
+    localStorage.setItem(KEY_PRODUTOS, JSON.stringify(produtos));
+    localStorage.setItem(KEY_VENDAS, String(vendasHoje));
+    localStorage.setItem(KEY_LIMITE, String(limiteBaixo));
+  }
+
+  function load() {
+    const rawP = localStorage.getItem(KEY_PRODUTOS);
+    if (rawP) {
+      try { produtos = JSON.parse(rawP); } catch (e) { produtos = []; }
+    } else {
+      produtos = SEED.map(p => ({ id: uid(), criadoEm: Date.now(), ...p }));
     }
-];
+    const rawV = localStorage.getItem(KEY_VENDAS);
+    if (rawV !== null) vendasHoje = parseFloat(rawV) || 0;
+    const rawL = localStorage.getItem(KEY_LIMITE);
+    if (rawL !== null) limiteBaixo = parseInt(rawL, 10) || 5;
+    save();
+  }
 
+  /* ============ CLOCK ============ */
+  function tickClock() {
+    const now = new Date();
+    const dias = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+    const meses = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+    const dataStr = `${dias[now.getDay()]}, ${String(now.getDate()).padStart(2,"0")} ${meses[now.getMonth()]} ${now.getFullYear()}`;
+    const horaStr = `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
+    $("#topDate").textContent = dataStr;
+    $("#topTime").textContent = horaStr;
+  }
 
-/* =========================
-   ELEMENTOS
-========================= */
+  /* ============ RENDER: STATS ============ */
+  function renderStats() {
+    const total = produtos.length;
+    const disponiveis = produtos.filter(p => p.quantidade > limiteBaixo).length;
+    const baixo = produtos.filter(p => p.quantidade > 0 && p.quantidade <= limiteBaixo).length;
+    $("#statTotal").textContent = total;
+    $("#statDisponiveis").textContent = disponiveis;
+    $("#statBaixo").textContent = baixo;
+    $("#statVendas").textContent = money(vendasHoje);
+  }
 
-const listaProdutos =
-    document.getElementById("listaProdutos");
+  /* ============ RENDER: INÍCIO (recente) ============ */
+  function renderRecente() {
+    const termo = ($("#buscaProduto").value || "").trim().toLowerCase();
+    let lista = [...produtos].sort((a, b) => b.criadoEm - a.criadoEm);
+    if (termo) {
+      lista = lista.filter(p => p.nome.toLowerCase().includes(termo) || p.codigo.includes(termo));
+    } else {
+      lista = lista.slice(0, 6);
+    }
+    const tbody = $("#tabelaRecente");
+    tbody.innerHTML = "";
+    lista.forEach(p => {
+      const st = statusOf(p.quantidade);
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${escapeHtml(p.nome)}</td>
+        <td>${p.quantidade}</td>
+        <td><span class="status-badge ${st.cls}">${st.label}</span></td>`;
+      tbody.appendChild(tr);
+    });
+    $("#recenteEmpty").hidden = lista.length !== 0;
+  }
 
-const form =
-    document.getElementById("produtoForm");
+  /* ============ RENDER: PRODUTOS ============ */
+  function renderProdutos() {
+    const termo = ($("#buscaProdutosView").value || "").trim().toLowerCase();
+    let lista = [...produtos].sort((a, b) => a.nome.localeCompare(b.nome));
+    if (termo) {
+      lista = lista.filter(p => p.nome.toLowerCase().includes(termo) || p.codigo.includes(termo));
+    }
+    const tbody = $("#tabelaProdutos");
+    tbody.innerHTML = "";
+    lista.forEach(p => {
+      const st = statusOf(p.quantidade);
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${escapeHtml(p.nome)}</td>
+        <td>${escapeHtml(p.codigo)}</td>
+        <td>${p.quantidade}</td>
+        <td><span class="status-badge ${st.cls}">${st.label}</span></td>
+        <td>
+          <div class="row-actions">
+            <button class="icon-btn" data-action="edit" data-id="${p.id}" title="Editar">✏️</button>
+            <button class="icon-btn danger" data-action="delete" data-id="${p.id}" title="Excluir">🗑️</button>
+          </div>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+    $("#produtosEmpty").hidden = lista.length !== 0;
+  }
 
-const pesquisa =
-    document.getElementById("pesquisa");
+  /* ============ RENDER: ESTOQUE ============ */
+  function renderEstoque() {
+    const tbody = $("#tabelaEstoque");
+    tbody.innerHTML = "";
+    const lista = [...produtos].sort((a, b) => a.nome.localeCompare(b.nome));
+    lista.forEach(p => {
+      const st = statusOf(p.quantidade);
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${escapeHtml(p.nome)}</td>
+        <td>${p.quantidade}</td>
+        <td>
+          <div class="qty-adjust">
+            <button data-action="dec" data-id="${p.id}">−</button>
+            <span>${p.quantidade}</span>
+            <button data-action="inc" data-id="${p.id}">+</button>
+          </div>
+        </td>
+        <td><span class="status-badge ${st.cls}">${st.label}</span></td>`;
+      tbody.appendChild(tr);
+    });
+    $("#estoqueEmpty").hidden = lista.length !== 0;
+  }
 
-const codigo =
-    document.getElementById("codigo");
+  /* ============ RENDER: RELATÓRIOS ============ */
+  function renderRelatorios() {
+    const total = produtos.length;
+    const disponiveis = produtos.filter(p => p.quantidade > limiteBaixo).length;
+    const baixo = produtos.filter(p => p.quantidade > 0 && p.quantidade <= limiteBaixo).length;
+    const semEstoque = produtos.filter(p => p.quantidade <= 0).length;
+    const totalUnidades = produtos.reduce((s, p) => s + p.quantidade, 0);
 
-const nome =
-    document.getElementById("nome");
+    $("#reportResumo").innerHTML = `
+      <li>Total de produtos <strong>${total}</strong></li>
+      <li>Disponíveis <strong>${disponiveis}</strong></li>
+      <li>Estoque baixo <strong>${baixo}</strong></li>
+      <li>Sem estoque <strong>${semEstoque}</strong></li>
+      <li>Total de unidades em estoque <strong>${totalUnidades}</strong></li>
+      <li>Vendas de hoje <strong>${money(vendasHoje)}</strong></li>`;
 
-const quantidade =
-    document.getElementById("quantidade");
+    const baixos = produtos.filter(p => p.quantidade <= limiteBaixo).sort((a, b) => a.quantidade - b.quantidade);
+    const tbody = $("#tabelaBaixoEstoque");
+    tbody.innerHTML = "";
+    baixos.forEach(p => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${escapeHtml(p.nome)}</td><td>${p.quantidade}</td>`;
+      tbody.appendChild(tr);
+    });
+    $("#baixoEmpty").hidden = baixos.length !== 0;
+  }
 
+  function renderAll() {
+    renderStats();
+    renderRecente();
+    renderProdutos();
+    renderEstoque();
+    renderRelatorios();
+  }
 
-/* =========================
-   DATA
-========================= */
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, (c) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
+  }
 
-function mostrarData() {
+  /* ============ NAVEGAÇÃO ============ */
+  function initNav() {
+    $$(".nav-item[data-view]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        $$(".nav-item[data-view]").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        const view = btn.dataset.view;
+        $$(".view").forEach(v => v.classList.remove("active"));
+        $("#view-" + view).classList.add("active");
+      });
+    });
+    $("#btnSair").addEventListener("click", () => {
+      if (confirm("Deseja sair do sistema?")) {
+        toast("Sessão encerrada.");
+      }
+    });
+  }
 
-    const data = new Date();
+  /* ============ FORMULÁRIO DE PRODUTO ============ */
+  let editandoId = null;
 
-    const texto = data.toLocaleDateString(
-        "pt-BR",
-        {
-            weekday: "long",
-            day: "2-digit",
-            month: "long",
-            year: "numeric"
-        }
-    );
+  function initForm() {
+    const form = $("#formProduto");
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const nome = $("#inputNome").value.trim();
+      const codigo = $("#inputCodigo").value.trim();
+      const qtd = parseInt($("#inputQtd").value, 10);
 
-    document.getElementById("dataAtual").textContent =
-        texto;
-}
+      const msg = $("#formMsg");
+      if (!nome || !codigo || isNaN(qtd) || qtd < 0) {
+        msg.textContent = "Preencha todos os campos corretamente.";
+        msg.className = "form-msg err";
+        return;
+      }
 
-mostrarData();
+      if (editandoId) {
+        const p = produtos.find(x => x.id === editandoId);
+        if (p) { p.nome = nome; p.codigo = codigo; p.quantidade = qtd; }
+        toast(`"${nome}" atualizado com sucesso.`);
+        editandoId = null;
+        $("#btnAdicionar").innerHTML = "<span>+</span> Adicionar produto";
+      } else {
+        produtos.push({ id: uid(), nome, codigo, quantidade: qtd, criadoEm: Date.now() });
+        toast(`"${nome}" adicionado ao estoque.`);
+      }
 
+      save();
+      renderAll();
+      form.reset();
+      msg.textContent = "Produto salvo com sucesso!";
+      msg.className = "form-msg ok";
+      setTimeout(() => { msg.textContent = ""; }, 2500);
+    });
+  }
 
-/* =========================
-   MOSTRAR PRODUTOS
-========================= */
+  function editarProduto(id) {
+    const p = produtos.find(x => x.id === id);
+    if (!p) return;
+    $("#inputNome").value = p.nome;
+    $("#inputCodigo").value = p.codigo;
+    $("#inputQtd").value = p.quantidade;
+    editandoId = id;
+    $("#btnAdicionar").innerHTML = "<span>✓</span> Salvar alterações";
+    document.querySelector('[data-view="inicio"]').click();
+    $("#inputNome").focus();
+    toast("Editando produto — atualize os campos e salve.");
+  }
 
-function mostrarProdutos(filtro = "") {
+  function excluirProduto(id) {
+    const p = produtos.find(x => x.id === id);
+    if (!p) return;
+    if (!confirm(`Excluir "${p.nome}" do estoque?`)) return;
+    produtos = produtos.filter(x => x.id !== id);
+    save();
+    renderAll();
+    toast(`"${p.nome}" removido.`);
+  }
 
-    listaProdutos.innerHTML = "";
+  function ajustarQtd(id, delta) {
+    const p = produtos.find(x => x.id === id);
+    if (!p) return;
+    p.quantidade = Math.max(0, p.quantidade + delta);
+    save();
+    renderAll();
+  }
 
-    const produtosFiltrados =
-        produtos.filter(produto =>
+  /* ============ AÇÕES NAS TABELAS (delegação) ============ */
+  function initTableActions() {
+    $("#tabelaProdutos").addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-action]");
+      if (!btn) return;
+      const id = btn.dataset.id;
+      if (btn.dataset.action === "edit") editarProduto(id);
+      if (btn.dataset.action === "delete") excluirProduto(id);
+    });
+    $("#tabelaEstoque").addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-action]");
+      if (!btn) return;
+      const id = btn.dataset.id;
+      if (btn.dataset.action === "inc") ajustarQtd(id, 1);
+      if (btn.dataset.action === "dec") ajustarQtd(id, -1);
+    });
+  }
 
-            produto.nome
-                .toLowerCase()
-                .includes(filtro.toLowerCase())
+  /* ============ BUSCA ============ */
+  function initSearch() {
+    $("#buscaProduto").addEventListener("input", renderRecente);
+    $("#buscaProdutosView").addEventListener("input", renderProdutos);
+  }
 
-            ||
+  /* ============ SCANNER DE CÓDIGO DE BARRAS ============ */
+  let mediaStream = null;
+  let detectLoopId = null;
+  let barcodeDetector = null;
 
-            produto.codigo.includes(filtro)
-        );
+  async function ativarCamera() {
+    const video = $("#scannerVideo");
+    const placeholder = $("#scanPlaceholder");
+    const frame = $("#scanFrame");
+    const footer = $("#scannerFooterText");
+    const badge = $("#scannerBadge");
 
+    try {
+      mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" }
+      });
+      video.srcObject = mediaStream;
+      video.style.display = "block";
+      placeholder.style.display = "none";
+      frame.hidden = false;
+      badge.textContent = "Câmera ativa";
+      footer.textContent = "📷 Aponte a câmera para o código de barras";
 
-    produtosFiltrados.forEach((produto, index) => {
+      if ("BarcodeDetector" in window) {
+        barcodeDetector = new BarcodeDetector({
+          formats: ["ean_13", "ean_8", "upc_a", "upc_e", "code_128", "code_39", "codabar", "itf"]
+        });
+        detectLoopId = requestAnimationFrame(detectLoop);
+      } else {
+        footer.textContent = "⌨️ Leitura automática indisponível neste navegador — digite o código manualmente.";
+      }
+    } catch (err) {
+      toast("Não foi possível acessar a câmera. Verifique as permissões.");
+      footer.textContent = "⌨️ Câmera indisponível — digite o código manualmente.";
+    }
+  }
 
-        const tr = document.createElement("tr");
+  async function detectLoop() {
+    const video = $("#scannerVideo");
+    if (!barcodeDetector || video.readyState < 2) {
+      detectLoopId = requestAnimationFrame(detectLoop);
+      return;
+    }
+    try {
+      const codes = await barcodeDetector.detect(video);
+      if (codes && codes.length > 0) {
+        onCodigoDetectado(codes[0].rawValue);
+        return; // pausa o loop após detectar
+      }
+    } catch (e) { /* ignora erros de frame */ }
+    detectLoopId = requestAnimationFrame(detectLoop);
+  }
 
+  function onCodigoDetectado(codigo) {
+    $("#inputCodigo").value = codigo;
+    const frame = $("#scanFrame");
+    frame.classList.add("flash");
+    $("#scannerFooterText").textContent = `✅ Código detectado: ${codigo}`;
+    beep();
+    toast(`Código de barras lido: ${codigo}`);
+    setTimeout(() => {
+      frame.classList.remove("flash");
+      $("#scannerFooterText").textContent = "📷 Aponte a câmera para o código de barras";
+      if (barcodeDetector) detectLoopId = requestAnimationFrame(detectLoop);
+    }, 1400);
+    $("#inputNome").focus();
+  }
 
-        let status = "Disponível";
+  function beep() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.18);
+    } catch (e) { /* áudio indisponível */ }
+  }
 
-        let classe = "disponivel";
+  function initScanner() {
+    $("#btnAtivarCamera").addEventListener("click", ativarCamera);
+    window.addEventListener("beforeunload", () => {
+      if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
+      if (detectLoopId) cancelAnimationFrame(detectLoopId);
+    });
+  }
 
+  /* ============ CONFIGURAÇÕES ============ */
+  function initConfig() {
+    $("#inputVendas").value = vendasHoje.toFixed(2);
+    $("#inputLimite").value = limiteBaixo;
 
-        if (produto.quantidade <= 3) {
-
-            status = "Estoque baixo";
-
-            classe = "baixo";
-
-        }
-
-
-        tr.innerHTML = `
-
-            <td>
-
-                <div class="produto">
-
-                    <div class="produto-icon">
-                        ${produto.icone}
-                    </div>
-
-                    <span>
-                        ${produto.nome}
-                    </span>
-
-                </div>
-
-            </td>
-
-
-            <td>
-                ${produto.codigo}
-            </td>
-
-
-            <td>
-                <strong>
-                    ${produto.quantidade}
-                </strong>
-            </td>
-
-
-            <td>
-
-                <span class="badge ${classe}">
-                    ${status}
-                </span>
-
-            </td>
-
-
-            <td>
-
-                <button
-                    class="btn-delete"
-                    onclick="excluirProduto(${index})"
-                >
-                    🗑
-                </button>
-
-            </td>
-
-        `;
-
-
-        listaProdutos.appendChild(tr);
-
+    $("#btnSalvarVendas").addEventListener("click", () => {
+      const v = parseFloat($("#inputVendas").value);
+      if (isNaN(v) || v < 0) { showConfigMsg("Informe um valor válido.", true); return; }
+      vendasHoje = v;
+      save();
+      renderStats();
+      showConfigMsg("Valor de vendas atualizado.");
     });
 
+    $("#btnSalvarLimite").addEventListener("click", () => {
+      const v = parseInt($("#inputLimite").value, 10);
+      if (isNaN(v) || v < 0) { showConfigMsg("Informe um limite válido.", true); return; }
+      limiteBaixo = v;
+      save();
+      renderAll();
+      showConfigMsg("Limite de estoque baixo atualizado.");
+    });
 
-    atualizarDashboard();
+    $("#btnExportar").addEventListener("click", () => {
+      const data = JSON.stringify({ produtos, vendasHoje, limiteBaixo }, null, 2);
+      const blob = new Blob([data], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "estoque-dados.json";
+      a.click();
+      URL.revokeObjectURL(url);
+      showConfigMsg("Dados exportados.");
+    });
 
-}
-
-
-/* =========================
-   DASHBOARD
-========================= */
-
-function atualizarDashboard() {
-
-    const total =
-        produtos.length;
-
-
-    const disponiveis =
-        produtos.filter(
-            produto => produto.quantidade > 3
-        ).length;
-
-
-    const baixo =
-        produtos.filter(
-            produto => produto.quantidade <= 3
-        ).length;
-
-
-    document.getElementById(
-        "totalProdutos"
-    ).textContent = total;
-
-
-    document.getElementById(
-        "produtosDisponiveis"
-    ).textContent = disponiveis;
-
-
-    document.getElementById(
-        "estoqueBaixo"
-    ).textContent = baixo;
-
-}
-
-
-/* =========================
-   ADICIONAR PRODUTO
-========================= */
-
-form.addEventListener(
-    "submit",
-    function(event) {
-
-        event.preventDefault();
-
-
-        const novoProduto = {
-
-            nome: nome.value,
-
-            codigo: codigo.value,
-
-            quantidade:
-                Number(quantidade.value),
-
-            icone: "📦"
-
-        };
-
-
-        const produtoExistente =
-            produtos.find(
-                produto =>
-                    produto.codigo === novoProduto.codigo
-            );
-
-
-        if (produtoExistente) {
-
-            produtoExistente.quantidade +=
-                novoProduto.quantidade;
-
-        } else {
-
-            produtos.push(novoProduto);
-
+    $("#inputImportar").addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          if (Array.isArray(data.produtos)) produtos = data.produtos;
+          if (typeof data.vendasHoje === "number") vendasHoje = data.vendasHoje;
+          if (typeof data.limiteBaixo === "number") limiteBaixo = data.limiteBaixo;
+          save();
+          renderAll();
+          $("#inputVendas").value = vendasHoje.toFixed(2);
+          $("#inputLimite").value = limiteBaixo;
+          showConfigMsg("Dados importados com sucesso.");
+        } catch (err) {
+          showConfigMsg("Arquivo inválido.", true);
         }
+      };
+      reader.readAsText(file);
+      e.target.value = "";
+    });
 
+    $("#btnResetar").addEventListener("click", () => {
+      if (!confirm("Isso vai apagar todos os produtos cadastrados e restaurar os dados de exemplo. Continuar?")) return;
+      localStorage.removeItem(KEY_PRODUTOS);
+      localStorage.removeItem(KEY_VENDAS);
+      localStorage.removeItem(KEY_LIMITE);
+      load();
+      renderAll();
+      $("#inputVendas").value = vendasHoje.toFixed(2);
+      $("#inputLimite").value = limiteBaixo;
+      showConfigMsg("Dados restaurados para o padrão.");
+    });
+  }
 
-        mostrarProdutos();
+  function showConfigMsg(msg, isErr) {
+    const el = $("#configMsg");
+    el.textContent = msg;
+    el.className = "form-msg " + (isErr ? "err" : "ok");
+    setTimeout(() => { el.textContent = ""; }, 3000);
+  }
 
+  /* ============ INIT ============ */
+  function init() {
+    load();
+    initNav();
+    initForm();
+    initTableActions();
+    initSearch();
+    initScanner();
+    initConfig();
+    renderAll();
+    tickClock();
+    setInterval(tickClock, 1000 * 10);
+  }
 
-        form.reset();
-
-
-        alert(
-            "Produto adicionado com sucesso!"
-        );
-
-    }
-);
-
-
-/* =========================
-   EXCLUIR
-========================= */
-
-function excluirProduto(index) {
-
-    const confirmar =
-        confirm(
-            "Deseja realmente excluir este produto?"
-        );
-
-
-    if (!confirmar) return;
-
-
-    produtos.splice(index, 1);
-
-
-    mostrarProdutos();
-
-}
-
-
-/* =========================
-   PESQUISA
-========================= */
-
-pesquisa.addEventListener(
-    "input",
-    function() {
-
-        mostrarProdutos(
-            pesquisa.value
-        );
-
-    }
-);
-
-
-/* =========================
-   SCANNER
-========================= */
-
-function iniciarScanner() {
-
-    const scanner =
-        new Html5QrcodeScanner(
-
-            "scanner",
-
-            {
-
-                fps: 10,
-
-                qrbox: {
-                    width: 280,
-                    height: 160
-                },
-
-                rememberLastUsedCamera: true
-
-            },
-
-            false
-        );
-
-
-    scanner.render(
-
-        function(codigoLido) {
-
-            console.log(
-                "Código encontrado:",
-                codigoLido
-            );
-
-
-            codigo.value =
-                codigoLido;
-
-
-            const produto =
-                produtos.find(
-                    item =>
-                        item.codigo === codigoLido
-                );
-
-
-            if (produto) {
-
-                nome.value =
-                    produto.nome;
-
-
-                quantidade.value =
-                    produto.quantidade;
-
-
-                alert(
-                    `Produto encontrado: ${produto.nome}`
-                );
-
-            } else {
-
-                alert(
-                    "Código lido! Agora informe o nome e a quantidade do produto."
-                );
-
-            }
-
-        },
-
-
-        function(error) {
-
-            // Ignora erros de leitura contínua
-
-        }
-
-    );
-
-}
-
-
-/* =========================
-   INICIAR
-========================= */
-
-mostrarProdutos();
-
-iniciarScanner();
+  document.addEventListener("DOMContentLoaded", init);
+})();
